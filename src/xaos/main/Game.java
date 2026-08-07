@@ -93,8 +93,6 @@ import xaos.zones.ZoneManager;
 
 public final class Game {
 
-	private static final long serialVersionUID = 1449863524190928424L;
-
 	public final static int SAVEGAME_V9_V10a = 1;
 	public final static int SAVEGAME_V10b = 2;
 	public final static int SAVEGAME_V11 = 3;
@@ -370,6 +368,7 @@ public final class Game {
 	public static void loadAllIniTextures () {
 		Properties properties = Towns.getPropertiesGraphics ();
 		if (properties != null) {
+			@SuppressWarnings("unchecked")
 			Enumeration<String> enumNames = (Enumeration<String>) properties.propertyNames ();
 			String sName;
 			ArrayList<String> alNames = new ArrayList<String> ();
@@ -635,7 +634,7 @@ public final class Game {
 					if (cit.getCitizenData () != null && cit.getCitizenData ().getGroupID () == -1) {
 						// Ciudadano sin grupo (pq no tiene grupo, pq es un save de la v10 o pq es una nueva partida)
 						if (!alCitsSinGrupo.contains (le.getID ())) {
-							alCitsSinGrupo.add (new Integer (le.getID ()));
+							alCitsSinGrupo.add (Integer.valueOf (le.getID ()));
 						}
 					}
 				}
@@ -1292,6 +1291,10 @@ public final class Game {
 						UIPanel.closeTypingPanel ();
 					}
 				} else {
+					if (iKEY == Keyboard.KEY_F9) {
+						xaos.panels.UIPanel.showPerformanceHUD = !xaos.panels.UIPanel.showPerformanceHUD;
+					}
+
 					if (iKEY == Keyboard.KEY_ESCAPE && getCurrentState () == STATE_SHOWING_CONTEXT_MENU) {
 						// Back al contextMenu
 						if (currentContextMenu.getSmartMenu ().getParent () == null) {

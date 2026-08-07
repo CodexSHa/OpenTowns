@@ -1,13 +1,12 @@
 package xaos.tiles.entities.living.friendly;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
 
 import xaos.tiles.entities.living.LivingEntity;
 
-public class Friendly extends LivingEntity implements Externalizable {
+public class Friendly extends LivingEntity {
 
     private static final long serialVersionUID = -7742274154801728614L;
 

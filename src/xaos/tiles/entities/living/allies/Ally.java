@@ -3,11 +3,10 @@ package xaos.tiles.entities.living.allies;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
-import java.io.Serializable;
 
 import xaos.tiles.entities.living.LivingEntity;
 
-public class Ally extends LivingEntity implements Serializable {
+public class Ally extends LivingEntity {
 
     private static final long serialVersionUID = 6466277440410807905L;
 

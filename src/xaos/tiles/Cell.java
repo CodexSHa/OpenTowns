@@ -2218,6 +2218,7 @@ public class Cell implements Externalizable {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void readExternal (ObjectInput in) throws IOException, ClassNotFoundException {
 		if (Game.SAVEGAME_LOADING_VERSION <= Game.SAVEGAME_V10b) {
 			flags = (int) in.readShort ();

@@ -1,7 +1,6 @@
 package xaos.tiles.entities.buildings;
 
 import java.awt.Color;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -24,7 +23,7 @@ import xaos.utils.Point3D;
 import xaos.utils.Point3DShort;
 import xaos.utils.UtilsIniHeaders;
 
-public class Building extends Entity implements Externalizable {
+public class Building extends Entity {
 
     private static final long serialVersionUID = 582404994776340708L;
 
@@ -564,6 +563,7 @@ public class Building extends Entity implements Externalizable {
         return BuildingManager.getItem(getIniHeader()).getName();
     }
 
+    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         operative = in.readBoolean();

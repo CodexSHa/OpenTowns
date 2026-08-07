@@ -5,8 +5,6 @@ import xaos.utils.Messages;
 
 public class Water {
 
-    private static final long serialVersionUID = 2201137814233532108L;
-
     public final static Tile[] TERRAIN_WATER = {
         new Tile("water"), //$NON-NLS-1$
         new Tile("watermin"), //$NON-NLS-1$

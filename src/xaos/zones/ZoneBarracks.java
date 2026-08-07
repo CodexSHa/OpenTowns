@@ -1,6 +1,5 @@
 package xaos.zones;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -8,7 +7,7 @@ import java.io.ObjectOutput;
 import xaos.data.SoldierGroupData;
 import xaos.main.Game;
 
-public class ZoneBarracks extends Zone implements Externalizable {
+public class ZoneBarracks extends Zone {
 
     private static final long serialVersionUID = -6093213217941710898L;
 

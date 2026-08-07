@@ -18,7 +18,6 @@ import xaos.stockpiles.StockpileTempData;
 import xaos.tiles.entities.items.military.MilitaryItem;
 import xaos.tiles.entities.living.Citizen;
 import xaos.utils.Messages;
-import xaos.utils.Point3D;
 import xaos.utils.UtilsIniHeaders;
 
 
@@ -828,6 +827,7 @@ public class Container implements Externalizable {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void readExternal (ObjectInput in) throws IOException, ClassNotFoundException {
 		itemID = in.readInt ();
 		itemsInside = (ArrayList<Item>) in.readObject ();

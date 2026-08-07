@@ -14,7 +14,6 @@ import xaos.main.Game;
 import xaos.main.World;
 import xaos.panels.MessagesPanel;
 import xaos.panels.TradeUIPanel;
-import xaos.panels.UIPanel;
 import xaos.panels.menus.SmartMenu;
 import xaos.tasks.HotPoint;
 import xaos.tasks.Task;
@@ -599,6 +598,7 @@ public class CaravanData implements Externalizable {
         return menuTownToSell;
     }
 
+    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         livingId = in.readInt();
         alItems = (ArrayList<CaravanItemDataInstance>) in.readObject();

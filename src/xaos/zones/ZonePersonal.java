@@ -1,6 +1,5 @@
 package xaos.zones;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -8,7 +7,7 @@ import java.io.ObjectOutput;
 import xaos.main.Game;
 import xaos.tiles.entities.living.Citizen;
 
-public class ZonePersonal extends Zone implements Externalizable {
+public class ZonePersonal extends Zone {
 
     private static final long serialVersionUID = -848265510157587431L;
 

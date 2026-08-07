@@ -1,7 +1,6 @@
 package xaos.tiles.entities.living.enemies;
 
 import java.awt.Color;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -30,7 +29,7 @@ import xaos.utils.Point3DShort;
 import xaos.utils.Utils;
 import xaos.utils.UtilsIniHeaders;
 
-public class Enemy extends LivingEntity implements Externalizable {
+public class Enemy extends LivingEntity {
 
     private static final long serialVersionUID = -115858431325278204L;
 

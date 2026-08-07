@@ -26,7 +26,6 @@ import xaos.tiles.Cell;
 import xaos.tiles.entities.items.Container;
 import xaos.tiles.entities.items.Item;
 import xaos.tiles.entities.items.ItemManager;
-import xaos.tiles.entities.items.ItemManagerItem;
 import xaos.tiles.entities.living.LivingEntity;
 import xaos.tiles.entities.living.LivingEntityManager;
 

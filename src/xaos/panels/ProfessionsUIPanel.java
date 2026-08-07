@@ -6,7 +6,6 @@ import xaos.actions.ActionPriorityManager;
 import xaos.main.Game;
 import xaos.panels.menus.SmartMenu;
 import xaos.tiles.Tile;
-import xaos.tiles.entities.items.Item;
 import xaos.utils.ColorGL;
 import xaos.utils.Messages;
 import xaos.utils.UtilFont;

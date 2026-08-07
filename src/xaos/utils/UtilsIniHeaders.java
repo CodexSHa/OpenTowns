@@ -6,8 +6,6 @@ import java.util.StringTokenizer;
 
 public class UtilsIniHeaders {
 
-    private static final long serialVersionUID = 8132377885335964294L;
-
     private static HashMap<String, Integer> hmIniHeaders = new HashMap<String, Integer>();
     private static ArrayList<String> alStringIniHeaders = new ArrayList<String>();
     private static int MAX_INI_HEADER = 0;

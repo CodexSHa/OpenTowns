@@ -1,7 +1,6 @@
 package xaos.tiles.entities.items;
 
 import java.awt.Color;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -17,7 +16,6 @@ import xaos.data.HateData;
 import xaos.effects.EffectManager;
 import xaos.events.EventManager;
 import xaos.events.EventManagerItem;
-import xaos.generator.MapGenerator;
 import xaos.main.Game;
 import xaos.main.World;
 import xaos.panels.CommandPanel;
@@ -45,7 +43,7 @@ import xaos.utils.UtilsIniHeaders;
 import xaos.zones.Zone;
 
 
-public class Item extends Entity implements Externalizable {
+public class Item extends Entity {
 
 	private static final long serialVersionUID = 5447839029431730457L;
 
@@ -1206,7 +1204,7 @@ public class Item extends Entity implements Externalizable {
 			}
 		}
 		if (bItemOK && alItemsToAvoid != null && alItemsToAvoid.size () > 0) {
-			bItemOK = !alItemsToAvoid.contains (new Integer (entity.getID ()));
+			bItemOK = !alItemsToAvoid.contains (Integer.valueOf (entity.getID ()));
 		}
 
 		return bItemOK;
@@ -1228,11 +1226,11 @@ public class Item extends Entity implements Externalizable {
 				if (citizen.getCurrentCustomAction () != null && citizen.getCurrentCustomAction ().getQueueData () != null) {
 					// Move
 					if (citizen.getCurrentCustomAction ().getQueueData ().getItemIDCurrentPlace () != -1) {
-						alItemsInUse.add (new Integer (citizen.getCurrentCustomAction ().getQueueData ().getItemIDCurrentPlace ()));
+						alItemsInUse.add (Integer.valueOf (citizen.getCurrentCustomAction ().getQueueData ().getItemIDCurrentPlace ()));
 					}
 					// Pick
 					if (citizen.getCurrentCustomAction ().getQueueData ().getItemIDPick () != -1) {
-						alItemsInUse.add (new Integer (citizen.getCurrentCustomAction ().getQueueData ().getItemIDPick ()));
+						alItemsInUse.add (Integer.valueOf (citizen.getCurrentCustomAction ().getQueueData ().getItemIDPick ()));
 					}
 				}
 			}
@@ -2284,6 +2282,7 @@ public class Item extends Entity implements Externalizable {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void readExternal (ObjectInput in) throws IOException, ClassNotFoundException {
 		super.readExternal (in);
 		flags = in.readByte ();

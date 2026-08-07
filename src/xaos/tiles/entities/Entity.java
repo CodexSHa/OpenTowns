@@ -1,6 +1,5 @@
 package xaos.tiles.entities;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -18,7 +17,7 @@ import xaos.utils.Point3D;
 import xaos.utils.Point3DShort;
 
 //public abstract class Entity extends Tile implements Comparable<Entity>, Serializable {
-public abstract class Entity extends Tile implements Externalizable {
+public abstract class Entity extends Tile {
 
     private static final long serialVersionUID = -2225320099181906815L;
 

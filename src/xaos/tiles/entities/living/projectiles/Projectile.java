@@ -1,6 +1,5 @@
 package xaos.tiles.entities.living.projectiles;
 
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -14,7 +13,7 @@ import xaos.tiles.entities.items.ItemManagerItem;
 import xaos.tiles.entities.living.LivingEntity;
 import xaos.utils.Point3DShort;
 
-public class Projectile extends Tile implements Externalizable {
+public class Projectile extends Tile {
 
     private static final long serialVersionUID = -5065819692431962137L;
 
@@ -212,6 +211,7 @@ public class Projectile extends Tile implements Externalizable {
         }
     }
 
+    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         super.readExternal(in);
         coordinates = (Point3DShort) in.readObject();

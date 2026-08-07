@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -15,7 +14,6 @@ import org.junit.jupiter.api.Test;
 
 import xaos.main.World;
 import xaos.tiles.Cell;
-import xaos.utils.Point3D;
 
 /**
  * L1 scripted-directive scenario: a single mine order, driven headlessly and
@@ -60,7 +58,6 @@ class ScenarioMineTest {
     static void bootIssueAndRun() throws Exception {
         userFolder = HeadlessRunner.newUserFolder();
         ScenarioRunner runner = ScenarioRunner.boot(userFolder, SEED, MAP);
-        World world = runner.world();
 
         Cell target = World.getCell(TX, TY, TZ);
         targetSolidBefore = !target.isMined() && !target.getTerrain().hasFluids();
@@ -93,9 +90,8 @@ class ScenarioMineTest {
      * turn, so summing both catches it whenever it is read.
      */
     private static int pendingTaskCount() {
-        World world = xaos.main.Game.getWorld();
-        return world.getTaskManager().getTaskItems().size()
-                + world.getTaskManager().getTaskItemsTemp().size();
+        return xaos.main.Game.getWorld().getTaskManager().getTaskItems().size()
+                + xaos.main.Game.getWorld().getTaskManager().getTaskItemsTemp().size();
     }
 
     @Test

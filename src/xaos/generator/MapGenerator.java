@@ -15,7 +15,6 @@ import xaos.tiles.terrain.TerrainManager;
 import xaos.tiles.terrain.TerrainManagerItem;
 import xaos.utils.Log;
 import xaos.utils.Messages;
-import xaos.utils.Point3D;
 import xaos.utils.Point3DShort;
 import xaos.utils.Utils;
 import xaos.utils.UtilsFiles;

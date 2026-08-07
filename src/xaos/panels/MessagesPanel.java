@@ -375,6 +375,7 @@ public final class MessagesPanel {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public static void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         messagesDataFull = (ArrayList<MessagesPanelData[]>) in.readObject();
         blink = (boolean[]) in.readObject();

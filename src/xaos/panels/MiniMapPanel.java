@@ -96,8 +96,26 @@ public final class MiniMapPanel {
         UtilsGL.drawTexture(iSquareX, iSquareY + iSquareHeight, iSquareX + iSquareWidth, iSquareY + iSquareHeight + 1, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
         UtilsGL.drawTexture(iSquareX, iSquareY, iSquareX + 1, iSquareY + iSquareHeight, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
         UtilsGL.drawTexture(iSquareX + iSquareWidth, iSquareY, iSquareX + iSquareWidth + 1, iSquareY + iSquareHeight, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
-        UtilsGL.glEnd();
+        // Render human indicators on minimap overlay
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, YELLOW_TILE.getTextureID());
+        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
+        UtilsGL.glBegin(GL11.GL_QUADS);
+        
+        java.util.ArrayList<Integer> citizens = World.getCitizenIDs();
+        if (citizens != null) {
+            for (int i = 0; i < citizens.size(); i++) {
+                xaos.tiles.entities.living.LivingEntity living = World.getLivingEntityByID(citizens.get(i));
+                if (living != null && living.getZ() == pointView.z) {
+                    int posX = (living.getX() + living.getY() - (World.MAP_WIDTH - World.MAP_HEIGHT) / 2) / 2;
+                    int posY = (living.getY() - living.getX() + (World.MAP_WIDTH + World.MAP_HEIGHT) / 2) / 2;
+                    posX = (posX * renderWidth) / World.MAP_WIDTH + renderX;
+                    posY = (posY * renderHeight) / World.MAP_HEIGHT + renderY;
 
+                    UtilsGL.drawTexture(posX - 1, posY - 1, posX + 2, posY + 2, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
+                }
+            }
+        }
+        UtilsGL.glEnd();
     }
 
     /**

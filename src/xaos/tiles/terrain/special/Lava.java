@@ -5,8 +5,6 @@ import xaos.utils.Messages;
 
 public class Lava {
 
-    private static final long serialVersionUID = 8093200100906408032L;
-
     public final static Tile[] TERRAIN_LAVA = {
         new Tile("lava"), //$NON-NLS-1$
         new Tile("lavamin"), //$NON-NLS-1$

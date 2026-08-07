@@ -25,8 +25,8 @@ Library GPL v2 text (OpenAL Soft).
 
 - Jars: `lwjgl`, `lwjgl-glfw`, `lwjgl-opengl`, `lwjgl-openal`, `lwjgl-stb`,
   `lwjgl-tinyfd`, each with a matching `natives-<os>` jar
-- Homepage: <https://www.lwjgl.org>
-- Source: <https://github.com/LWJGL/lwjgl3> (tag `3.3.6`)
+- Homepage: [https://www.lwjgl.org](https://www.lwjgl.org)
+- Source: [https://github.com/LWJGL/lwjgl3](https://github.com/LWJGL/lwjgl3) (tag `3.3.6`)
 - License: BSD 3-Clause
 
 ```text
@@ -69,7 +69,7 @@ native libraries.
 - Shipped as `glfw.dll` / `libglfw.so` / `libglfw.dylib` inside the
   `lwjgl-glfw` natives jar (LWJGL 3.3.6 builds GLFW 3.5.0 from the GLFW
   development branch)
-- Homepage: <https://www.glfw.org>
+- Homepage: [https://www.glfw.org](https://www.glfw.org)
 - License: zlib/libpng
 
 ```text
@@ -101,7 +101,7 @@ freely, subject to the following restrictions:
 - Shipped as `OpenAL.dll` / `libopenal.so` / `libopenal.dylib` inside the
   `lwjgl-openal` natives jar; loaded dynamically at runtime
 - Copyright (C) 1999-2007 by authors (OpenAL cross platform audio library)
-- Source: <https://github.com/kcat/openal-soft> (tag `1.24.1`)
+- Source: [https://github.com/kcat/openal-soft](https://github.com/kcat/openal-soft) (tag `1.24.1`)
 - License: GNU Library General Public License, version 2 or (at your
   option) any later version; full text in Appendix B
 
@@ -110,7 +110,7 @@ freely, subject to the following restrictions:
 - stb_image v2.30, stb_image_write, stb_vorbis and related single-file
   libraries by Sean Barrett, compiled into `lwjgl_stb.dll` (and the
   equivalent `.so`/`.dylib`) inside the `lwjgl-stb` natives jar
-- Homepage: <https://github.com/nothings/stb>
+- Homepage: [https://github.com/nothings/stb](https://github.com/nothings/stb)
 - License: dual-licensed, public domain (Unlicense) or MIT, at your option
 
 ```text
@@ -157,7 +157,7 @@ WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 - Compiled into `lwjgl_tinyfd.dll` (and the equivalent `.so`/`.dylib`)
   inside the `lwjgl-tinyfd` natives jar
-- Homepage: <http://tinyfiledialogs.sourceforge.net>
+- Homepage: [http://tinyfiledialogs.sourceforge.net](http://tinyfiledialogs.sourceforge.net)
 - License: zlib
 
 ```text
@@ -185,7 +185,7 @@ misrepresented as being the original software.
 - Jar: `jna-3.3.0.jar` (Java Native Access; used for the optional Steam
   API binding)
 - Copyright (c) 2007-2011 Timothy Wall and contributors
-- Source: <https://github.com/java-native-access/jna> (tag `3.3.0`);
+- Source: [https://github.com/java-native-access/jna](https://github.com/java-native-access/jna) (tag `3.3.0`);
   the corresponding sources jar is published on Maven Central as
   `net.java.dev.jna:jna:3.3.0:sources`
 - License: GNU Lesser General Public License, version 2.1 or (at your
@@ -743,8 +743,6 @@ necessary.  Here is a sample; alter the names:
   Ty Coon, President of Vice
 
 That's all there is to it!
-
-
 ```
 
 ---

@@ -1,7 +1,6 @@
 package xaos.tiles.entities.living.heroes;
 
 import java.awt.Color;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -45,7 +44,7 @@ import xaos.zones.Zone;
 import xaos.zones.ZoneManager;
 import xaos.zones.ZoneManagerItem;
 
-public class Hero extends LivingEntity implements Externalizable {
+public class Hero extends LivingEntity {
 
     private static final long serialVersionUID = 3221178311971531048L;
 

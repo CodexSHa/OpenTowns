@@ -47,8 +47,6 @@ import xaos.utils.UtilsGL;
 
 public final class CommandPanel {
 
-    private static final long serialVersionUID = 5224811443500566092L;
-
     // MAIN MENU
     public static String COMMAND_MM_NEWGAME = "NEWGAME"; //$NON-NLS-1$
     public static String COMMAND_MM_NEWGAME_SET_SAVE_NAME = "NEWGAMESETSAVENAME"; //$NON-NLS-1$

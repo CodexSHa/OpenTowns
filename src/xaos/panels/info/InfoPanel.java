@@ -1,13 +1,5 @@
 package xaos.panels.info;
 
-import org.lwjgl.opengl.GL11;
-
-import xaos.main.Game;
-import xaos.panels.MainPanel;
-import xaos.panels.UIPanel;
-import xaos.utils.UtilFont;
-import xaos.utils.UtilsGL;
-
 /**
  * Clase base para los paneles de información
  */

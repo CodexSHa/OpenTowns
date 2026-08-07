@@ -150,9 +150,9 @@ public final class MainMenuPanel implements Runnable {
         SmartMenu menuAux;
         menu = new ContextMenu();
         menu.setHeight(Game.MIN_DISPLAY_HEIGHT - UtilFont.MAX_HEIGHT * 8);
-        Color textColor = Color.WHITE;
-        Color creditsColor = Color.YELLOW;
-        ColorGL borderColor = new ColorGL(Color.BLACK);
+        Color textColor = new Color(245, 235, 205); // Modern warm cream gold
+        Color creditsColor = new Color(255, 200, 80); // Vibrant accent gold
+        ColorGL borderColor = new ColorGL(new Color(15, 18, 22, 220)); // Sleek dark border shadow
         SmartMenu mainMenu = new SmartMenu();
         mainMenu.setTrasparency(true);
 

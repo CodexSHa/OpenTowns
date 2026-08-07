@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -166,7 +167,7 @@ public class UtilsServer {
             url = "http://" + url; //$NON-NLS-1$
         }
 
-        URL urlObject = new URL(url);
+        URL urlObject = URI.create(url).toURL();
         URLConnection uc = urlObject.openConnection();
 
         try {
@@ -176,8 +177,8 @@ public class UtilsServer {
             // unreachable, which is exactly the case for the defunct
             // townsmods.net. The read timeout was already set but never helped,
             // since the stall was in connect, not read.
-            uc.setConnectTimeout (1500);
-            uc.setReadTimeout (1500);
+            uc.setConnectTimeout (400);
+            uc.setReadTimeout (400);
         }
         catch (Exception e) {
         }
@@ -205,7 +206,7 @@ public class UtilsServer {
         /*
          * Get a connection to the URL and start up a buffered reader.
          */
-        URL url = new URL(dlURL);
+        URL url = URI.create(dlURL).toURL();
         url.openConnection();
         InputStream reader = url.openStream();
 
@@ -214,13 +215,11 @@ public class UtilsServer {
          */
         FileOutputStream writer = new FileOutputStream(sPathToFile);
         byte[] buffer = new byte[32 * 1024];
-        int totalBytesRead = 0;
         int bytesRead = 0;
 
         while ((bytesRead = reader.read(buffer)) > 0) {
             writer.write(buffer, 0, bytesRead);
             buffer = new byte[32 * 1024];
-            totalBytesRead += bytesRead;
         }
 
         writer.close();

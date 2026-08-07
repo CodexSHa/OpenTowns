@@ -20,7 +20,6 @@ import xaos.tiles.entities.items.Item;
 import xaos.tiles.entities.items.ItemManager;
 import xaos.tiles.entities.items.ItemManagerItem;
 import xaos.utils.Messages;
-import xaos.utils.Point3D;
 import xaos.utils.Point3DShort;
 
 
@@ -743,6 +742,7 @@ public class Stockpile implements Externalizable {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void readExternal (ObjectInput in) throws IOException, ClassNotFoundException {
 		ID = in.readInt ();
 		type = (Type) in.readObject ();

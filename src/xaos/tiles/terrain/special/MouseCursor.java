@@ -5,8 +5,6 @@ import xaos.tiles.Tile;
 
 public class MouseCursor {
 
-    private static final long serialVersionUID = -1691568571780933791L;
-
     public final static Tile[] TERRAIN_CURSORS = {
         new Tile("mouseCursor"), //$NON-NLS-1$
         new Tile("mouseCursorBlock"), //$NON-NLS-1$

@@ -1,7 +1,6 @@
 package xaos.tiles.entities.items.military;
 
 import java.awt.Color;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -13,7 +12,7 @@ import xaos.tiles.entities.items.ItemManagerItem;
 import xaos.tiles.entities.living.LivingEntity;
 import xaos.utils.Messages;
 
-public class MilitaryItem extends Item implements Externalizable {
+public class MilitaryItem extends Item {
 
     private static final long serialVersionUID = 2994148931507925799L;
 

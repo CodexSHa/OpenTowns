@@ -14,7 +14,7 @@ public class StockpileTempData {
 
     public void addElement(String sElement, boolean bStatus) {
         alElements.add(sElement);
-        alElementsStatus.add(new Boolean(bStatus));
+        alElementsStatus.add(Boolean.valueOf(bStatus));
     }
 
     public ArrayList<String> getAlElements() {

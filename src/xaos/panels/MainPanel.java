@@ -65,8 +65,6 @@ import xaos.zones.ZonePersonal;
 
 public final class MainPanel {
 
-	private static final long serialVersionUID = 6859663021221287027L;
-
 	private static Tile GRID_TILE = new Tile ("grid"); //$NON-NLS-1$
 	private static Tile GRID_NOT_ALLOWED_TILE = new Tile ("gridNA"); //$NON-NLS-1$
 	private static Tile MOUSE_3D_TILE = new Tile ("mouseCursor3D"); //$NON-NLS-1$
@@ -1643,6 +1641,19 @@ public final class MainPanel {
 					UtilsGL.drawStringZ (le.getDamageAnimationText (), iXSpecific, iYSpecific, ColorGL.RED, iDepth);
 
 				}
+			}
+
+			// Render Health Micro-Bar for damaged entities
+			int curHP = le.getLivingEntityData().getHealthPoints();
+			int maxHP = le.getLivingEntityData().getHealthPointsMAXCurrent();
+			if (curHP < maxHP) {
+				float hpRatio = (float) curHP / (float) maxHP;
+				int barWidth = 24;
+				int barX = iXGeneral + (Tile.TERRAIN_ICON_WIDTH / 2) - (barWidth / 2);
+				int barY = iYGeneral - 20;
+				ColorGL barColor = (hpRatio > 0.5f) ? ColorGL.GREEN : (hpRatio > 0.25f) ? ColorGL.YELLOW : ColorGL.RED;
+				currentTextureID = UtilsGL.setTexture (-1, Game.TEXTURE_FONT_ID);
+				UtilsGL.drawStringZ ("[" + curHP + "/" + maxHP + "]", barX - 4, barY, barColor, iDepth + 1);
 			}
 
 			le.updateAnimation (lemi.isAnimatedWhenIdle ());

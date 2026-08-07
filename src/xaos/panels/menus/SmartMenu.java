@@ -298,20 +298,36 @@ public class SmartMenu implements Externalizable {
             UtilsGL.glEnd();
         }
 
-        // Rectángulito rojo en el item marcado (excepto TYPE_TEXT)
+        if (isContext && isTrasparency() && getItems() != null && getItems().size() > 0) {
+            // Render modern dark glassmorphic card background behind menu options
+            GL11.glBindTexture(GL11.GL_TEXTURE_2D, RED_TILE.getTextureID());
+            GL11.glColor4f(0.08f, 0.10f, 0.14f, 0.72f);
+            UtilsGL.glBegin(GL11.GL_QUADS);
+            UtilsGL.drawTexture(x - 12, y - 6, x + width + 20, y + (getItems().size() * UtilFont.MAX_HEIGHT) + 6, RED_TILE.getTileSetTexX0(), RED_TILE.getTileSetTexY0(), RED_TILE.getTileSetTexX1(), RED_TILE.getTileSetTexY1());
+            UtilsGL.glEnd();
+            
+            // Left accent border bar
+            GL11.glColor4f(0.90f, 0.70f, 0.20f, 0.90f);
+            UtilsGL.glBegin(GL11.GL_QUADS);
+            UtilsGL.drawTexture(x - 14, y - 6, x - 10, y + (getItems().size() * UtilFont.MAX_HEIGHT) + 6, RED_TILE.getTileSetTexX0(), RED_TILE.getTileSetTexY0(), RED_TILE.getTileSetTexX1(), RED_TILE.getTileSetTexY1());
+            UtilsGL.glEnd();
+        }
+
+        // Render modern glassmorphism selection highlight box behind hovered menu item
         int iY;
         int mouseX = Mouse.getX();
         int mouseY = UtilsGL.getHeight() - Mouse.getY() - 1;
         int itemIndex = -1;
         if (isContext) {
-            if (mouseX >= x && mouseX < (x + width) && mouseY >= y && mouseY < (y + getItems().size() * UtilFont.MAX_HEIGHT)) {
+            if (mouseX >= (x - 12) && mouseX < (x + width + 20) && mouseY >= y && mouseY < (y + getItems().size() * UtilFont.MAX_HEIGHT)) {
                 itemIndex = (mouseY - y) / UtilFont.MAX_HEIGHT;
-                if (getItems().get(itemIndex).getType() != TYPE_TEXT) {
-                    iY = y + itemIndex * UtilFont.MAX_HEIGHT + 1;
+                if (itemIndex >= 0 && itemIndex < getItems().size() && getItems().get(itemIndex).getType() != TYPE_TEXT) {
+                    iY = y + itemIndex * UtilFont.MAX_HEIGHT;
+                    // Draw modern highlighted selection bar
                     GL11.glBindTexture(GL11.GL_TEXTURE_2D, RED_TILE.getTextureID());
-                    GL11.glColor3f(1, 0, 0);
+                    GL11.glColor4f(0.95f, 0.75f, 0.20f, 0.85f);
                     UtilsGL.glBegin(GL11.GL_QUADS);
-                    UtilsGL.drawTexture(x, iY, x + width, iY + UtilFont.MAX_HEIGHT, RED_TILE.getTileSetTexX0(), RED_TILE.getTileSetTexY0(), RED_TILE.getTileSetTexX1(), RED_TILE.getTileSetTexY1());
+                    UtilsGL.drawTexture(x - 8, iY, x + width + 14, iY + UtilFont.MAX_HEIGHT, RED_TILE.getTileSetTexX0(), RED_TILE.getTileSetTexY0(), RED_TILE.getTileSetTexX1(), RED_TILE.getTileSetTexY1());
                     UtilsGL.glEnd();
                 }
             }
@@ -320,7 +336,7 @@ public class SmartMenu implements Externalizable {
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
         GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 
-        // Menú
+        // Render sleek modern menu options
         UtilsGL.glBegin(GL11.GL_QUADS);
         String sTexto;
         SmartMenu item;
@@ -333,7 +349,12 @@ public class SmartMenu implements Externalizable {
                 sTexto = item.getName();
             }
 
-            if (item.getBorderColor() != null) {
+            ColorGL textColor = item.getColor();
+            if (i == itemIndex && item.getType() != TYPE_TEXT) {
+                textColor = new ColorGL(0.10f, 0.10f, 0.12f); // Dark contrast text on active hover bar
+            }
+
+            if (item.getBorderColor() != null && i != itemIndex) {
                 UtilsGL.drawString(sTexto, x, iY - 1, item.getBorderColor());
                 UtilsGL.drawString(sTexto, x + 1, iY - 1, item.getBorderColor());
                 UtilsGL.drawString(sTexto, x + 2, iY - 1, item.getBorderColor());
@@ -346,13 +367,13 @@ public class SmartMenu implements Externalizable {
                 if (item.getParent() != null) {
                     UtilsGL.drawString(sTexto, x + 1, iY, COLORGL_SUBMENU);
                 } else {
-                    UtilsGL.drawString(sTexto, x + 1, iY, item.getColor());
+                    UtilsGL.drawString(sTexto, x + 1, iY, textColor);
                 }
             } else {
-                if (item.getParent() != null) {
+                if (item.getParent() != null && i != itemIndex) {
                     UtilsGL.drawString(sTexto, x, iY, COLORGL_SUBMENU);
                 } else {
-                    UtilsGL.drawString(sTexto, x, iY, item.getColor());
+                    UtilsGL.drawString(sTexto, x, iY, textColor);
                 }
             }
 
@@ -1009,6 +1030,7 @@ public class SmartMenu implements Externalizable {
         return alParts.get(0);
     }
 
+    @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         type = in.readInt();
         name = (String) in.readObject();

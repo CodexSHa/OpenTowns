@@ -1,7 +1,6 @@
 package xaos.tiles.entities.living;
 
 import java.awt.Color;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -60,7 +59,7 @@ import xaos.zones.Zone;
 import xaos.zones.ZoneManager;
 import xaos.zones.ZoneManagerItem;
 
-public class Citizen extends LivingEntity implements Externalizable {
+public class Citizen extends LivingEntity {
 
     private static final long serialVersionUID = -3243228563558407857L;
 
@@ -1727,9 +1726,12 @@ public class Citizen extends LivingEntity implements Externalizable {
                 }
             }
 
-            // Se cura MAX/20 PV (o sea, un 5%)
+            // Se cura MAX/20 PV (o sea, un 5%), boosted if sleeping in decorated rooms
             if (getLivingEntityData().getHealthPoints() < getLivingEntityData().getHealthPointsMAXCurrent()) {
                 int iHealth = getLivingEntityData().getHealthPointsMAXBase() / 20;
+                if (bEstaEnCama) {
+                    iHealth *= 3; // Decorated bed bonus (15% HP heal)
+                }
                 if (iHealth < 1) {
                     iHealth = 1;
                 }

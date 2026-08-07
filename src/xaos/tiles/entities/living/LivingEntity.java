@@ -2,7 +2,6 @@ package xaos.tiles.entities.living;
 
 import java.awt.Color;
 import java.awt.geom.Point2D;
-import java.io.Externalizable;
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -32,7 +31,6 @@ import xaos.main.World;
 import xaos.panels.CommandPanel;
 import xaos.panels.MessagesPanel;
 import xaos.panels.TradeUIPanel;
-import xaos.panels.UIPanel;
 import xaos.panels.menus.SmartMenu;
 import xaos.property.PropertyFile;
 import xaos.skills.SkillManagerItem;
@@ -73,7 +71,7 @@ import xaos.zones.ZoneHeroRoom;
 import xaos.zones.ZonePersonal;
 
 
-public abstract class LivingEntity extends Entity implements Externalizable {
+public abstract class LivingEntity extends Entity {
 
 	private static final long serialVersionUID = 3084403150672553278L;
 
@@ -388,7 +386,7 @@ public abstract class LivingEntity extends Entity implements Externalizable {
 	 * @param iNumber Cantidad
 	 */
 	public static void setNumLivings (String sIniHeader, int iNumber, boolean bDiscovered) {
-		getMapLivings (bDiscovered).put (sIniHeader, new Integer (iNumber));
+		getMapLivings (bDiscovered).put (sIniHeader, Integer.valueOf (iNumber));
 	}
 
 
@@ -2203,7 +2201,7 @@ public abstract class LivingEntity extends Entity implements Externalizable {
 				if (citizen.getCurrentCustomAction () != null && citizen.getCurrentCustomAction ().getQueueData () != null) {
 					// Pick_living
 					if (citizen.getCurrentCustomAction ().getQueueData ().getLivingIDPick () != -1) {
-						alItemsInUse.add (new Integer (citizen.getCurrentCustomAction ().getQueueData ().getLivingIDPick ()));
+						alItemsInUse.add (Integer.valueOf (citizen.getCurrentCustomAction ().getQueueData ().getLivingIDPick ()));
 					}
 				}
 			}
@@ -2214,7 +2212,7 @@ public abstract class LivingEntity extends Entity implements Externalizable {
 				if (citizen.getCurrentCustomAction () != null && citizen.getCurrentCustomAction ().getQueueData () != null) {
 					// Pick_living
 					if (citizen.getCurrentCustomAction ().getQueueData ().getLivingIDPick () != -1) {
-						alItemsInUse.add (new Integer (citizen.getCurrentCustomAction ().getQueueData ().getLivingIDPick ()));
+						alItemsInUse.add (Integer.valueOf (citizen.getCurrentCustomAction ().getQueueData ().getLivingIDPick ()));
 					}
 				}
 			}
@@ -4565,6 +4563,7 @@ public abstract class LivingEntity extends Entity implements Externalizable {
 	}
 
 
+	@SuppressWarnings("unchecked")
 	public void readExternal (ObjectInput in) throws IOException, ClassNotFoundException {
 		super.readExternal (in);
 		path = (ArrayList<Point3DShort>) in.readObject ();
