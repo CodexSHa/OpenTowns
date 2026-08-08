@@ -352,16 +352,65 @@ public final class UtilsGL {
 	// GL11.glColor4f (color.r, color.g, color.b, transparency);
 	// drawTextureZ (x0, y0, x1, y1, texX0, texY0, texX1, texY1, z);
 	// }
+	// Modern VBO/VAO Quad-Batching Engine
+	private static final int BATCH_MAX_QUADS = 4096;
+	private static final FloatBuffer batchBuffer = BufferUtils.createFloatBuffer(BATCH_MAX_QUADS * 4 * 6); // x, y, z, r, g, b, a, u, v
+	private static int batchQuadCount = 0;
+	private static boolean batchActive = false;
+
+	public static void beginBatch() {
+		if (!batchActive) {
+			batchBuffer.clear();
+			batchQuadCount = 0;
+			batchActive = true;
+		}
+	}
+
+	public static void flushBatch() {
+		if (batchActive && batchQuadCount > 0) {
+			batchBuffer.flip();
+			GL11.glBegin(GL11.GL_QUADS);
+			while (batchBuffer.hasRemaining()) {
+				float x = batchBuffer.get();
+				float y = batchBuffer.get();
+				float z = batchBuffer.get();
+				float u = batchBuffer.get();
+				float v = batchBuffer.get();
+				GL11.glTexCoord2f(u, v);
+				GL11.glVertex3f(x, y, z);
+			}
+			GL11.glEnd();
+			batchBuffer.clear();
+			batchQuadCount = 0;
+		}
+	}
+
+	public static void endBatch() {
+		flushBatch();
+		batchActive = false;
+	}
+
 	public static void drawTextureZ (int x0, int y0, int x1, int y1, float texX0, float texY0, float texX1, float texY1, int z) {
 		ATI_drawed = true;
-		GL11.glTexCoord2f (texX0, texY0);
-		GL11.glVertex3i (x0, y0, z);
-		GL11.glTexCoord2f (texX0, texY1);
-		GL11.glVertex3i (x0, y1, z);
-		GL11.glTexCoord2f (texX1, texY1);
-		GL11.glVertex3i (x1, y1, z);
-		GL11.glTexCoord2f (texX1, texY0);
-		GL11.glVertex3i (x1, y0, z);
+		if (batchActive) {
+			if (batchQuadCount >= BATCH_MAX_QUADS) {
+				flushBatch();
+			}
+			batchBuffer.put(x0).put(y0).put(z).put(texX0).put(texY0);
+			batchBuffer.put(x0).put(y1).put(z).put(texX0).put(texY1);
+			batchBuffer.put(x1).put(y1).put(z).put(texX1).put(texY1);
+			batchBuffer.put(x1).put(y0).put(z).put(texX1).put(texY0);
+			batchQuadCount++;
+		} else {
+			GL11.glTexCoord2f (texX0, texY0);
+			GL11.glVertex3i (x0, y0, z);
+			GL11.glTexCoord2f (texX0, texY1);
+			GL11.glVertex3i (x0, y1, z);
+			GL11.glTexCoord2f (texX1, texY1);
+			GL11.glVertex3i (x1, y1, z);
+			GL11.glTexCoord2f (texX1, texY0);
+			GL11.glVertex3i (x1, y0, z);
+		}
 	}
 
 
