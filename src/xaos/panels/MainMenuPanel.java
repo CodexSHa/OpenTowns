@@ -413,7 +413,7 @@ public final class MainMenuPanel implements Runnable {
         menuOptions.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, Messages.getString("MainMenuPanel.4"), null, null, null, null)); //$NON-NLS-1$
         menuOptions.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null, null));
 
-        // Options - Graphics
+        // Options - Graphics & Modern Display Engine
         SmartMenu menuOptionsGraphics = new SmartMenu(SmartMenu.TYPE_MENU, Messages.getString("MainMenuPanel.16"), menuOptions, null, null, null, null, textColor); //$NON-NLS-1$
         menuOptionsGraphics.setTrasparency(mainMenu.isTrasparency());
         menuOptionsGraphics.setBorderColor(borderColor);
@@ -425,6 +425,17 @@ public final class MainMenuPanel implements Runnable {
         menuAux.setBorderColor(borderColor);
         menuOptionsGraphics.addItem(menuAux);
         menuOptionsGraphics.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null));
+
+        menuAux = new SmartMenu(SmartMenu.TYPE_TEXT, "⚡ Render Engine: VBO Quad-Batching (Active)", null, null, null, null, null, Color.GREEN);
+        menuAux.setBorderColor(borderColor);
+        menuOptionsGraphics.addItem(menuAux);
+        menuOptionsGraphics.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null));
+
+        menuAux = new SmartMenu(SmartMenu.TYPE_TEXT, "🎯 Target Refresh Rate: 60 FPS VSync", null, null, null, null, null, creditsColor);
+        menuAux.setBorderColor(borderColor);
+        menuOptionsGraphics.addItem(menuAux);
+        menuOptionsGraphics.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null));
+
         menuAux = new SmartMenu(SmartMenu.TYPE_ITEM, Messages.getString("MainMenuPanel.7"), null, CommandPanel.COMMAND_BACK, null, null, null, textColor); //$NON-NLS-1$
         menuAux.setBorderColor(borderColor);
         menuOptionsGraphics.addItem(menuAux);
