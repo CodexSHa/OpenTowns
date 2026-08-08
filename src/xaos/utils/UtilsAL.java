@@ -251,10 +251,32 @@ public final class UtilsAL {
                     int source = obtainFXSource();
                     AL10.alSourceStop(source);
                     AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
+                    AL10.alSource3f(source, AL10.AL_POSITION, 0f, 0f, 0f);
                     AL10.alSourcef(source, AL10.AL_GAIN, fxVolume);
                     AL10.alSourcePlay(source);
                 }
             }
+        }
+    }
+
+    /** Plays a spatial 3D sound effect at specific world tile coordinates */
+    public static void play3D(String sKey, int x, int y, int z) {
+        if (!Game.isMusicON() && !Game.isFXON()) {
+            return;
+        }
+
+        Integer buffer = hmAudio.get(sKey);
+        if (buffer != null && Game.isFXON()) {
+            int source = obtainFXSource();
+            AL10.alSourceStop(source);
+            AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
+            // Attenuation & spatial positioning relative to world center
+            float posX = (x - (Game.getWorld() != null ? Game.getWorld().getView().x : 0)) * 0.1f;
+            float posY = (y - (Game.getWorld() != null ? Game.getWorld().getView().y : 0)) * 0.1f;
+            float posZ = (z - (Game.getWorld() != null ? Game.getWorld().getView().z : 0)) * 0.5f;
+            AL10.alSource3f(source, AL10.AL_POSITION, posX, posY, posZ);
+            AL10.alSourcef(source, AL10.AL_GAIN, fxVolume);
+            AL10.alSourcePlay(source);
         }
     }
 

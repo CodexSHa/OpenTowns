@@ -488,24 +488,25 @@ public final class MainPanel {
 				}
 			}
 		} else {
-			// Niveles por debajo (más oscuro)
+			// Progressive depth darkness per lower elevation layer (zLevelOffset >= 1)
+			float depthDarkening = Math.min(0.35f, (zLevelOffset - 1) * 0.12f);
 			if (cell.isShadow (true)) {
 				if (cell.isLight ()) {
-					fColor = 0.80f;
+					fColor = Math.max(0.2f, 0.70f - depthDarkening);
 				} else {
-					fColor = 0.5f;
+					fColor = Math.max(0.15f, 0.40f - depthDarkening);
 				}
 			} else if (Game.getWorld ().getGlobalEvents ().isHalfShadows ()) {
 				if (cell.isLight ()) {
-					fColor = 0.90f;
+					fColor = Math.max(0.25f, 0.78f - depthDarkening);
 				} else {
-					fColor = 0.65f;
+					fColor = Math.max(0.2f, 0.50f - depthDarkening);
 				}
 			} else {
 				if (cell.isLight ()) {
-					fColor = 0.85f;
+					fColor = Math.max(0.3f, 0.72f - depthDarkening);
 				} else {
-					fColor = 0.75f; // Casilla normal (sin sombra y sin luz)
+					fColor = Math.max(0.25f, 0.58f - depthDarkening); // Casilla por debajo más oscura
 				}
 			}
 		}
@@ -1470,28 +1471,37 @@ public final class MainPanel {
 				}
 
 				// Miramos si duerme o come
-				if (cit.getCitizenData ().getBlinkAnimationTurns () > (CitizenData.MAX_BLINK_ANIMATION_TURNS / 2)) {
+				boolean isSleeping = cit.isSleeping();
+				boolean isEating = cit.getCitizenData().getHungry() <= 0;
+				if (isSleeping || (isEating && cit.getCitizenData().getBlinkAnimationTurns() > (CitizenData.MAX_BLINK_ANIMATION_TURNS / 2))) {
 					Tile tileTask = null;
-					if (cit.isSleeping ()) {
-						tileTask = World.getTileCitizenSleeping ();
-					} else if (cit.getCitizenData ().getHungry () <= 0) {
-						tileTask = World.getTileCitizenEating ();
+					if (isSleeping) {
+						tileTask = World.getTileCitizenSleeping();
+					} else if (isEating) {
+						tileTask = World.getTileCitizenEating();
 					}
 
 					if (tileTask != null) {
-						iYSpecific = iYGeneral - (tileTask.getTileHeight () - Tile.TERRAIN_ICON_HEIGHT) + tileTask.getTileHeightOffset () + (int) cit.getPositionOffset ().y;
-						iXSpecific = iXGeneral + (int) cit.getPositionOffset ().x;
+						// Gentle floating bobbing & pulse offset for sleeping ZZZ animation
+						int yBobOffset = 0;
+						if (isSleeping) {
+							long gameTime = System.currentTimeMillis();
+							// Floating bobbing effect (-6px to +2px)
+							yBobOffset = (int) (Math.sin(gameTime / 250.0) * 4.0) - 2;
+						}
 
-						currentTextureID = setColorShadowLightCellNoLight (cell, tileTask, zLevelOffset, currentTextureID, false);
-						UtilsGL.drawTextureZ (iXSpecific, iYSpecific, iXSpecific + tileTask.getTileWidth (), iYSpecific + tileTask.getTileHeight (), tileTask.getTileSetTexX0 (), tileTask.getTileSetTexY0 (), tileTask.getTileSetTexX1 (), tileTask.getTileSetTexY1 (), iDepth);
+						iYSpecific = iYGeneral - (tileTask.getTileHeight() - Tile.TERRAIN_ICON_HEIGHT) + tileTask.getTileHeightOffset() + (int) cit.getPositionOffset().y + yBobOffset;
+						iXSpecific = iXGeneral + (int) cit.getPositionOffset().x;
+
+						currentTextureID = setColorShadowLightCellNoLight(cell, tileTask, zLevelOffset, currentTextureID, false);
+						UtilsGL.drawTextureZ(iXSpecific, iYSpecific, iXSpecific + tileTask.getTileWidth(), iYSpecific + tileTask.getTileHeight(), tileTask.getTileSetTexX0(), tileTask.getTileSetTexY0(), tileTask.getTileSetTexX1(), tileTask.getTileSetTexY1(), iDepth);
 
 						// En el caso de comer, miramos si está pasando hambre porque no hay comida
-						if (!cit.isSleeping () && cit.getCitizenData ().getHungryEating () < 0) {
+						if (!isSleeping && cit.getCitizenData().getHungryEating() < 0) {
 							// Dibujamos la cruz roja
-							Tile tileRedCross = World.getTileRedCross ();
-							// currentTextureID = UtilsGL.setTexture (tileRedCross, currentTextureID);
-							currentTextureID = setColorShadowLightCellNoLight (cell, tileRedCross, zLevelOffset, currentTextureID, false);
-							UtilsGL.drawTextureZ (iXSpecific, iYSpecific, iXSpecific + tileRedCross.getTileWidth (), iYSpecific + tileRedCross.getTileHeight (), tileRedCross.getTileSetTexX0 (), tileRedCross.getTileSetTexY0 (), tileRedCross.getTileSetTexX1 (), tileRedCross.getTileSetTexY1 (), iDepth);
+							Tile tileRedCross = World.getTileRedCross();
+							currentTextureID = setColorShadowLightCellNoLight(cell, tileRedCross, zLevelOffset, currentTextureID, false);
+							UtilsGL.drawTextureZ(iXSpecific, iYSpecific, iXSpecific + tileRedCross.getTileWidth(), iYSpecific + tileRedCross.getTileHeight(), tileRedCross.getTileSetTexX0(), tileRedCross.getTileSetTexY0(), tileRedCross.getTileSetTexX1(), tileRedCross.getTileSetTexY1(), iDepth);
 						}
 					}
 				}
@@ -1928,6 +1938,10 @@ public final class MainPanel {
 
 		ArrayList<String> alMessages = new ArrayList<String> ();
 		ArrayList<ColorGL> alColor = new ArrayList<ColorGL> ();
+
+		// Elevation Z-Level indicator header
+		alMessages.add ("📐 Floor Elevation: Level " + pointTileMouse.z);
+		alColor.add (ColorGL.YELLOW);
 
 		// Terrain / Zones
 		String sMessage = null;

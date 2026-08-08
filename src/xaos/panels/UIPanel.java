@@ -148,6 +148,11 @@ public final class UIPanel {
 	// public final static int MOUSE_GODS_ICON = 108;
 	public final static int MOUSE_TUTORIAL_ICON = 109;
 
+	private static int cachedWoodCount = 0;
+	private static int cachedStoneCount = 0;
+	private static int cachedOreCount = 0;
+	private static int cachedTotalFood = 100;
+
 	public final static int MOUSE_ICON_MATS = 120;
 	public final static int MOUSE_MATS_PANEL = 121;
 	public final static int MOUSE_MATS_PANEL_BUTTONS_CLOSE = 122;
@@ -1430,20 +1435,38 @@ public final class UIPanel {
 			}
 		}
 
+		// Performance Throttling: Run heavy inventory & save checks once per second (every 60 frames)
+		if (blinkTurns == 0) {
+			if (hasResourceManager) {
+				cachedWoodCount = xaos.tiles.entities.items.Item.getNumItemsTotal("rmwood", World.MAP_DEPTH - 1);
+				cachedStoneCount = xaos.tiles.entities.items.Item.getNumItemsTotal("rmstone", World.MAP_DEPTH - 1);
+				cachedOreCount = xaos.tiles.entities.items.Item.getNumItemsTotal("rmiron", World.MAP_DEPTH - 1) 
+						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmcopper", World.MAP_DEPTH - 1) 
+						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmsilver", World.MAP_DEPTH - 1) 
+						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmgold", World.MAP_DEPTH - 1)
+						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmcoal", World.MAP_DEPTH - 1);
+			}
+			cachedTotalFood = xaos.tiles.entities.items.Item.getNumItemsTotal("apple", World.MAP_DEPTH - 1)
+					+ xaos.tiles.entities.items.Item.getNumItemsTotal("bread", World.MAP_DEPTH - 1)
+					+ xaos.tiles.entities.items.Item.getNumItemsTotal("cookedfish", World.MAP_DEPTH - 1)
+					+ xaos.tiles.entities.items.Item.getNumItemsTotal("rawfish", World.MAP_DEPTH - 1)
+					+ xaos.tiles.entities.items.Item.getNumItemsTotal("cookedsteak", World.MAP_DEPTH - 1)
+					+ xaos.tiles.entities.items.Item.getNumItemsTotal("rawsteak", World.MAP_DEPTH - 1);
+		}
+
 		if (hasResourceManager) {
-			int woodCount = xaos.tiles.entities.items.Item.getNumItemsTotal("wood", World.MAP_DEPTH - 1);
-			int stoneCount = xaos.tiles.entities.items.Item.getNumItemsTotal("stone", World.MAP_DEPTH - 1);
-			int oreCount = xaos.tiles.entities.items.Item.getNumItemsTotal("iron_ore", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("copper_ore", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("silver_ore", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("gold_ore", World.MAP_DEPTH - 1);
-			String resText = "Wood: " + woodCount + " | Stone: " + stoneCount + " | Ores: " + oreCount;
+			String resText = "Wood: " + cachedWoodCount + " | Stone: " + cachedStoneCount + " | Ores: " + cachedOreCount;
 			UtilsGL.drawStringWithBorder(resText, datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.ORANGE, ColorGL.BLACK);
 		} else {
 			UtilsGL.drawStringWithBorder("Assign Resource Manager to view totals", datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.LIGHT_GRAY, ColorGL.BLACK);
 		}
 
 		// Low Food / Famine Alert Banner
-		int totalFood = xaos.tiles.entities.items.Item.getNumItemsTotal("bread", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("cookedfish", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("rawfish", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("cookedsteak", World.MAP_DEPTH - 1) + xaos.tiles.entities.items.Item.getNumItemsTotal("rawsteak", World.MAP_DEPTH - 1);
-		if (totalFood < 10 && (blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			UtilsGL.drawStringWithBorder("LOW FOOD WARNING (" + totalFood + " remaining)!", renderWidth / 2 - 110, 75, ColorGL.RED, ColorGL.BLACK);
+		if (cachedTotalFood < 10 && (blinkTurns >= MAX_BLINK_TURNS / 2)) {
+			String lowFoodMsg = "⚠️ LOW FOOD WARNING (" + cachedTotalFood + " remaining)!";
+			int msgW = UtilFont.getWidth(lowFoodMsg);
+			int bannerY = datePanelPoint.y + tileDatePanel.getTileHeight() + tileIconMats.getTileHeight() + 15;
+			UtilsGL.drawStringWithBorder(lowFoodMsg, renderWidth / 2 - msgW / 2, bannerY, ColorGL.RED, ColorGL.BLACK);
 		}
 
 		// Caravan Departure Countdown Tracker
@@ -1453,11 +1476,28 @@ public final class UIPanel {
 			UtilsGL.drawStringWithBorder("🚢 Merchant departs in: " + hoursLeft + "h", renderWidth - 220, 75, ColorGL.YELLOW, ColorGL.BLACK);
 		}
 
-		// Floating Modern Toast Notification Card
+		// Floating Modern Toast Notification Cards & Idle Settlers Tracker
 		if (World.getCitizenIDs() != null && !World.getCitizenIDs().isEmpty()) {
 			int totalPop = World.getCitizenIDs().size();
-			UtilsGL.drawStringWithBorder("🔔 Town Status: " + totalPop + " Settlers Active", renderWidth - 250, 105, ColorGL.LIGHT_GRAY, ColorGL.BLACK);
+			int idleCount = 0;
+			for (int c = 0; c < World.getCitizenIDs().size(); c++) {
+				Citizen cit = (Citizen) World.getLivingEntityByID(World.getCitizenIDs().get(c));
+				if (cit != null && cit.getCurrentTask() == null) {
+					idleCount++;
+				}
+			}
+			ColorGL statusColor = idleCount > 0 ? ColorGL.ORANGE : ColorGL.LIGHT_GRAY;
+			UtilsGL.drawStringWithBorder("🔔 Town Status: " + totalPop + " Settlers (" + idleCount + " Idle)", renderWidth - 270, 105, statusColor, ColorGL.BLACK);
 		}
+
+		// QoL Hotkey Hints Overlay & Game Speed Quick Indicator
+		int currentZLevel = (Game.getWorld() != null && Game.getWorld().getView() != null) ? Game.getWorld().getView().z : 0;
+		String speedLabel = "Speed: " + World.SPEED + "x " + (Game.isPaused() ? "(PAUSED)" : "(PLAYING)") + " | 📐 Elevation: Floor " + currentZLevel;
+		ColorGL speedColor = Game.isPaused() ? ColorGL.LIGHT_GRAY : ColorGL.GREEN;
+		UtilsGL.drawStringWithBorder(speedLabel, 15, renderHeight - 45, speedColor, ColorGL.BLACK);
+
+		String hotkeyGuide = "[F9] HUD | [Space] Pause | [1-4] Speed | [PgUp/PgDn] Elevation | [Ctrl+Wheel] Zoom | [MMB Drag] Pan";
+		UtilsGL.drawStringWithBorder(hotkeyGuide, 15, renderHeight - 25, ColorGL.YELLOW, ColorGL.BLACK);
 
 		// Performance & FPS Overlay (F9)
 		if (showPerformanceHUD) {
@@ -1465,7 +1505,7 @@ public final class UIPanel {
 			long maxMem = Runtime.getRuntime().maxMemory() / (1024 * 1024);
 			long totalMem = Runtime.getRuntime().totalMemory() / (1024 * 1024);
 			int pendingTasks = (Game.getWorld() != null && Game.getWorld().getTaskManager() != null) ? Game.getWorld().getTaskManager().getTaskItems().size() : 0;
-			UtilsGL.drawStringWithBorder("[F9 HUD] Memory: " + (totalMem - freeMem) + "/" + maxMem + " MB | Active Tasks: " + pendingTasks, 10, renderHeight - 25, ColorGL.GREEN, ColorGL.BLACK);
+			UtilsGL.drawStringWithBorder("[F9 HUD] Memory: " + (totalMem - freeMem) + "/" + maxMem + " MB | Active Tasks: " + pendingTasks, 15, renderHeight - 65, ColorGL.GREEN, ColorGL.BLACK);
 		}
 
 		if (TownsProperties.DEBUG_MODE) {

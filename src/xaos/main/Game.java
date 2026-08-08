@@ -110,8 +110,8 @@ public final class Game {
 	public final static String BURY_FOLDER1 = "bury"; //$NON-NLS-1$
 	public final static String SCREENSHOTS_FOLDER1 = "screenshots"; //$NON-NLS-1$
 
-	public static int FPS_MAINMENU = 30;
-	public static int FPS_INGAME = 30;
+	public static int FPS_MAINMENU = 60;
+	public static int FPS_INGAME = 60;
 
 	public static final int MIN_DISPLAY_WIDTH = 1024;
 	public static final int MIN_DISPLAY_HEIGHT = 600;
@@ -149,6 +149,9 @@ public final class Game {
 	private static String fileSeparator;
 
 	private static boolean bPaused;
+
+	private static int lastMmbX = -1;
+	private static int lastMmbY = -1;
 
 	public static int iError;
 
@@ -1199,7 +1202,7 @@ public final class Game {
 				}
 			}
 
-			// Wheel
+			// Wheel: Mouse Wheel switches floor elevation layer
 			if (Mouse.getEventDWheel () > 0) {
 				if (getPanelMainMenu ().isActive ()) {
 					continue;
@@ -1211,6 +1214,29 @@ public final class Game {
 				}
 				world.keyPressed (Keyboard.KEY_NONE, UtilsKeyboard.FN_LEVEL_DOWN);
 			}
+		}
+
+		// Middle-Mouse Drag (MMB Drag) Pan Navigation Engine
+		if (Mouse.isButtonDown(2) && !getPanelMainMenu().isActive()) {
+			if (lastMmbX != -1 && lastMmbY != -1) {
+				int dx = mouseX - lastMmbX;
+				int dy = mouseY - lastMmbY;
+				if (dx < -2) {
+					world.keyPressed(Keyboard.KEY_NONE, UtilsKeyboard.FN_RIGHT);
+				} else if (dx > 2) {
+					world.keyPressed(Keyboard.KEY_NONE, UtilsKeyboard.FN_LEFT);
+				}
+				if (dy < -2) {
+					world.keyPressed(Keyboard.KEY_NONE, UtilsKeyboard.FN_DOWN);
+				} else if (dy > 2) {
+					world.keyPressed(Keyboard.KEY_NONE, UtilsKeyboard.FN_UP);
+				}
+			}
+			lastMmbX = mouseX;
+			lastMmbY = mouseY;
+		} else {
+			lastMmbX = -1;
+			lastMmbY = -1;
 		}
 
 		// Bordes (scroll de mouse)

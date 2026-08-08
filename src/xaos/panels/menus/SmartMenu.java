@@ -783,9 +783,15 @@ public class SmartMenu implements Externalizable {
                         }
                     }
 
-                    // "Building" (o objetos "move")
+                    // "Building" (o objetos "move") - Consolidate duplicates with xN
+                    java.util.LinkedHashMap<String, Integer> mapBuilding = new java.util.LinkedHashMap<String, Integer>();
                     for (int i = 0; i < alMessagesBuilding.size(); i++) {
-                        alMessages.add(alMessagesBuilding.get(i));
+                        String name = alMessagesBuilding.get(i);
+                        mapBuilding.put(name, mapBuilding.getOrDefault(name, 0) + 1);
+                    }
+                    for (java.util.Map.Entry<String, Integer> entry : mapBuilding.entrySet()) {
+                        String label = entry.getValue() > 1 ? entry.getKey() + " x" + entry.getValue() : entry.getKey();
+                        alMessages.add(label);
                         alColor.add(COLOR_BUILDING);
                     }
 
@@ -797,9 +803,15 @@ public class SmartMenu implements Externalizable {
                         }
                     }
 
-                    // Prerequisites (o objetos "pick")
+                    // Prerequisites (o objetos "pick") - Consolidate duplicates with xN
+                    java.util.LinkedHashMap<String, Integer> mapPrereqs = new java.util.LinkedHashMap<String, Integer>();
                     for (int i = 0; i < alMessagesPrerequisites.size(); i++) {
-                        alMessages.add(alMessagesPrerequisites.get(i));
+                        String name = alMessagesPrerequisites.get(i);
+                        mapPrereqs.put(name, mapPrereqs.getOrDefault(name, 0) + 1);
+                    }
+                    for (java.util.Map.Entry<String, Integer> entry : mapPrereqs.entrySet()) {
+                        String label = entry.getValue() > 1 ? entry.getKey() + " x" + entry.getValue() : entry.getKey();
+                        alMessages.add(label);
                         alColor.add(COLOR_PREREQUISITES);
                     }
                 }

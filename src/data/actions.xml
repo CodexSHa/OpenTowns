@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 
 <actions>
 	<!-- non AP actions -->
@@ -2960,7 +2960,7 @@
 
 		<queue>
 			<lock>kitchentable</lock>
-			<pick>rawsteak</pick>
+			<pick>rawsteak,rawdeersteak</pick>
 			<move>kitchentable</move>
 			<wait>32</wait>
 			<destroyItem />
