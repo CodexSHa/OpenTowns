@@ -462,6 +462,30 @@ public final class UtilsGL {
 		GL11.glVertex2i (x3, y3);
 	}
 
+	public static void drawRectangle(int x0, int y0, int x1, int y1, ColorGL color, float transparency) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glColor4f(color.r, color.g, color.b, transparency);
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glVertex2i(x0, y0);
+		GL11.glVertex2i(x0, y1);
+		GL11.glVertex2i(x1, y1);
+		GL11.glVertex2i(x1, y0);
+		GL11.glEnd();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
+	public static void drawRectangleBorder(int x0, int y0, int x1, int y1, ColorGL color) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glColor3f(color.r, color.g, color.b);
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		GL11.glVertex2i(x0, y0);
+		GL11.glVertex2i(x0, y1);
+		GL11.glVertex2i(x1, y1);
+		GL11.glVertex2i(x1, y0);
+		GL11.glEnd();
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+	}
+
 
 	// public static void drawStringZ (String sMessage, int x, int y, int z) {
 	// drawStringZ (sMessage, x, y, null, z);

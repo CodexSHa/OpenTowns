@@ -1499,6 +1499,46 @@ public final class UIPanel {
 		String hotkeyGuide = "[F9] HUD | [Space] Pause | [1-4] Speed | [PgUp/PgDn] Elevation | [Ctrl+Wheel] Zoom | [MMB Drag] Pan";
 		UtilsGL.drawStringWithBorder(hotkeyGuide, 15, renderHeight - 25, ColorGL.YELLOW, ColorGL.BLACK);
 
+		// Real-Time Minimap Radar Overlay Engine (Bottom-Right HUD Card)
+		if (Game.getWorld() != null && Game.getWorld().getView() != null) {
+			int miniW = 120;
+			int miniH = 120;
+			int miniX = renderWidth - miniW - 15;
+			int miniY = renderHeight - miniH - 15;
+
+			// Minimap Background Card
+			UtilsGL.drawRectangle(miniX - 4, miniY - 4, miniX + miniW + 4, miniY + miniH + 4, ColorGL.BLACK, 0.75f);
+			UtilsGL.drawRectangleBorder(miniX - 4, miniY - 4, miniX + miniW + 4, miniY + miniH + 4, ColorGL.ORANGE);
+			UtilsGL.drawStringWithBorder("🧭 Minimap", miniX + 25, miniY - 18, ColorGL.YELLOW, ColorGL.BLACK);
+
+			// Render Citizens (Green Dots) & Camera View Box (White Outline)
+			if (World.getCitizenIDs() != null) {
+				for (int c = 0; c < World.getCitizenIDs().size(); c++) {
+					Citizen cit = (Citizen) World.getLivingEntityByID(World.getCitizenIDs().get(c));
+					if (cit != null && cit.getCoordinates() != null) {
+						int px = miniX + (int) ((cit.getCoordinates().x / (float) World.MAP_WIDTH) * miniW);
+						int py = miniY + (int) ((cit.getCoordinates().y / (float) World.MAP_HEIGHT) * miniH);
+						UtilsGL.drawRectangle(px, py, px + 3, py + 3, ColorGL.GREEN, 1.0f);
+					}
+				}
+			}
+
+			// Camera Position Frame
+			int camPx = miniX + (int) ((Game.getWorld().getView().x / (float) World.MAP_WIDTH) * miniW);
+			int camPy = miniY + (int) ((Game.getWorld().getView().y / (float) World.MAP_HEIGHT) * miniH);
+			UtilsGL.drawRectangleBorder(camPx - 6, camPy - 6, camPx + 12, camPy + 12, ColorGL.WHITE);
+		}
+
+		// Atmospheric Dynamic Weather & Season Particles (Rain drops / Snow flurries)
+		long gameTime = System.currentTimeMillis();
+		boolean isSnowing = (Game.getWorld() != null && Game.getWorld().getDate() != null && Game.getWorld().getDate().getMonth() == 12);
+		ColorGL precipColor = isSnowing ? ColorGL.WHITE : ColorGL.LIGHT_GRAY;
+		for (int p = 0; p < 40; p++) {
+			int px = (int) ((p * 47 + gameTime / (isSnowing ? 8 : 3)) % renderWidth);
+			int py = (int) ((p * 83 + gameTime / (isSnowing ? 6 : 2)) % renderHeight);
+			UtilsGL.drawRectangle(px, py, px + (isSnowing ? 2 : 1), py + (isSnowing ? 2 : 4), precipColor, 0.4f);
+		}
+
 		// Performance & FPS Overlay (F9)
 		if (showPerformanceHUD) {
 			long freeMem = Runtime.getRuntime().freeMemory() / (1024 * 1024);
