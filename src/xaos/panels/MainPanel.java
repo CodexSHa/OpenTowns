@@ -217,7 +217,6 @@ public final class MainPanel {
 			bCheckBlinkCells = false;
 		}
 
-		UtilsGL.beginBatch();
 		if (bMouseInMainArea) {
 			int iTextureID = renderAllTerrains (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, pointTileMouse, 0, -1);
 			iTextureID = renderAllEntities (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, pointTileMouse, 0, iTextureID);
@@ -228,7 +227,6 @@ public final class MainPanel {
 			iTextureID = renderAllEntities (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, null, 0, iTextureID);
 			renderTask (zView, iBaseXGeneral, iBaseYGeneral + Tile.TERRAIN_ICON_HEIGHT, null, iTextureID, cellXMin, cellYMin);
 		}
-		UtilsGL.endBatch();
 		GL11.glDisable (GL11.GL_DEPTH_TEST);
 
 		// Animation de los special tiles
