@@ -1241,16 +1241,22 @@ public final class MainPanel {
 						} else {
 							tile = World.getTileWater (cell.getTerrain ().getFluidCount ());
 						}
+						GL11.glEnable (GL11.GL_BLEND);
+						GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+						currentTextureID = setColorShadowLightCell (cell, tile, zLevelOffset, currentTextureID, true);
+						float fAlpha = (cell.getTerrain().getFluidCount() >= 5) ? 0.76f : 0.60f;
+						GL11.glColor4f (0.18f, 0.52f, 0.88f, fAlpha);
+						UtilsGL.drawTextureZ (iXGeneral, iYSpecific, iXGeneral + tile.getTileWidth (), iYSpecific + tile.getTileHeight (), tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 (), iDepth);
+						GL11.glDisable (GL11.GL_BLEND);
 					} else { // if (cell.getTerrain ().getFluidType () == Terrain.FLUIDS_LAVA) {
 						if (item != null && ItemManager.getItem (item.getIniHeader ()).isAllowFluids ()) {
 							tile = World.getTileLava (1);
 						} else {
 							tile = World.getTileLava (cell.getTerrain ().getFluidCount ());
 						}
+						currentTextureID = setColorShadowLightCell (cell, tile, zLevelOffset, currentTextureID, false);
+						UtilsGL.drawTextureZ (iXGeneral, iYSpecific, iXGeneral + tile.getTileWidth (), iYSpecific + tile.getTileHeight (), tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 (), iDepth);
 					}
-					// currentTextureID = UtilsGL.setTexture (tile, currentTextureID);
-					currentTextureID = setColorShadowLightCell (cell, tile, zLevelOffset, currentTextureID, false);
-					UtilsGL.drawTextureZ (iXGeneral, iYSpecific, iXGeneral + tile.getTileWidth (), iYSpecific + tile.getTileHeight (), tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 (), iDepth);
 					// Debug, fuerza de los fluidos
 					// if (Game.DEBUG_MODE) {
 					// UtilsGL.glEnd ();
@@ -2317,7 +2323,7 @@ public final class MainPanel {
 	 */
 	private static Point3D getTileMouse (int x, int y, int xView, int yView, int zView) {
 		// Mouse en ningún panel (o sea, en la main area)
-		y -= Tile.TERRAIN_ICON_HEIGHT;
+		y += Tile.TERRAIN_ICON_HEIGHT / 2;
 		int casellaX = (x / 2 - y) / Tile.TERRAIN_ICON_HEIGHT;
 		if (x / 2 - y < 0) {
 			casellaX--;

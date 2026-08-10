@@ -2997,12 +2997,17 @@ public abstract class LivingEntity extends Entity {
 			if (item == null) {
 				item = cell.getItem ();
 			}
-			if (item != null && item.isLocked () && item.isOperative ()) {
+			if (item != null && item.isOperative ()) {
 				ItemManagerItem imi = ItemManager.getItem (item.getIniHeader ());
-
-				// Items tipo "wall" no se puede, locked doors tampoco
-				if (imi.isWall () || (imi.isDoor () && item.isDoorStatus (Item.FLAG_WALL_CONNECTOR_STATUS_LOCKED_AND_CLOSED))) {
-					return false;
+				if (imi != null) {
+					// Items tipo "wall" no se puede pasar si está operativo
+					if (imi.isWall ()) {
+						return false;
+					}
+					// Locked doors y closed doors tampoco
+					if (imi.isDoor () && item.isDoorStatus (Item.FLAG_WALL_CONNECTOR_STATUS_LOCKED_AND_CLOSED)) {
+						return false;
+					}
 				}
 			}
 		}

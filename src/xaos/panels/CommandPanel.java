@@ -157,6 +157,11 @@ public final class CommandPanel {
     public static final String COMMAND_ADD_PATROL_POINT_GROUP = "ADDPATROLPOINTGROUP"; //$NON-NLS-1$
     public static final String COMMAND_REMOVE_PATROL_POINT_GROUP = "REMOVEPATROLPOINTGROUP"; //$NON-NLS-1$
 
+    // All soldiers
+    public static final String COMMAND_ADD_PATROL_POINT_ALL = "ADDPATROLPOINTALL"; //$NON-NLS-1$
+    public static final String COMMAND_REMOVE_PATROL_POINT_ALL = "REMOVEPATROLPOINTALL"; //$NON-NLS-1$
+    public static final String COMMAND_SOLDIER_SET_STATE_ALL = "SOLDIERSETSTATEALL"; //$NON-NLS-1$
+
     // Job groups
     public static final String COMMAND_CITIZEN_SET_JOB_GROUP = "CITSETJOBGROUP"; //$NON-NLS-1$
     public static final String COMMAND_JOB_GROUP_ENABLE_ALL = "JGENABLEALL"; //$NON-NLS-1$
@@ -753,6 +758,27 @@ public final class CommandPanel {
                 Game.getWorld().getTaskManager().addTask(task);
             } else if (sCommand.equals(COMMAND_REMOVE_PATROL_POINT_GROUP)) {
                 Task task = new Task(Task.TASK_SOLDIER_REMOVE_PATROL_POINT_GROUP);
+                task.setTile(tile, iconType);
+                task.setParameter(sParameter);
+                task.setParameter2(sParameter2);
+                task.setPointIni(p3dDirect);
+                Game.getWorld().getTaskManager().addTask(task);
+            } else if (sCommand.equals(COMMAND_SOLDIER_SET_STATE_ALL)) {
+                Task task = new Task(Task.TASK_SOLDIER_SET_STATE_ALL);
+                task.setTile(tile, iconType);
+                task.setParameter(sParameter);
+                task.setParameter2(sParameter2);
+                task.setPointIni(p3dDirect);
+                Game.getWorld().getTaskManager().addTask(task);
+            } else if (sCommand.equals(COMMAND_ADD_PATROL_POINT_ALL)) {
+                Task task = new Task(Task.TASK_SOLDIER_ADD_PATROL_POINT_ALL);
+                task.setTile(tile, iconType);
+                task.setParameter(sParameter);
+                task.setParameter2(sParameter2);
+                task.setPointIni(p3dDirect);
+                Game.getWorld().getTaskManager().addTask(task);
+            } else if (sCommand.equals(COMMAND_REMOVE_PATROL_POINT_ALL)) {
+                Task task = new Task(Task.TASK_SOLDIER_REMOVE_PATROL_POINT_ALL);
                 task.setTile(tile, iconType);
                 task.setParameter(sParameter);
                 task.setParameter2(sParameter2);

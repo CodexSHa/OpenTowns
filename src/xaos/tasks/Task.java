@@ -83,6 +83,9 @@ public final class Task implements Externalizable {
     // Groups
     public final static int TASK_SOLDIER_ADD_PATROL_POINT_GROUP = 20; // Tarea de añadir un punto de patrol a un grupo
     public final static int TASK_SOLDIER_REMOVE_PATROL_POINT_GROUP = 21; // Tarea de eliminar un punto de patrol a un grupo
+    public final static int TASK_SOLDIER_ADD_PATROL_POINT_ALL = 51; // Add patrol point to all patrol soldiers
+    public final static int TASK_SOLDIER_REMOVE_PATROL_POINT_ALL = 52; // Remove patrol point from all patrol soldiers
+    public final static int TASK_SOLDIER_SET_STATE_ALL = 53; // Set state for all soldiers
 
     // Buildings
     public final static int TASK_BUILD = 25; // Tarea de construir (edificios)

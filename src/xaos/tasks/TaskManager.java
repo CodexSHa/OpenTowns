@@ -1229,7 +1229,43 @@ public final class TaskManager implements Externalizable {
 
                 SoldierGroupData sgd = Game.getWorld().getSoldierGroups().getGroup(groupID);
                 sgd.removePatrolPoint(p3dPatrol);
-
+                item.getTask().setFinished(true);
+            } else if (item.getTask().getTask() == Task.TASK_SOLDIER_ADD_PATROL_POINT_ALL) {
+                // AÑADIR PUNTO DE PATROL A TODOS LOS SOLDADOS EN PATROL
+                Point3DShort p3dPatrolShort = item.getTask().getPointIni().toPoint3DShort();
+                if (p3dPatrolShort != null && World.getCell(p3dPatrolShort).getAstarZoneID() != -1) {
+                    Citizen cit;
+                    Point3D p3dPatrol = item.getTask().getPointIni();
+                    for (int j = 0; j < World.getSoldierIDs().size(); j++) {
+                        cit = (Citizen) World.getLivingEntityByID(World.getSoldierIDs().get(j));
+                        if (cit != null && cit.getSoldierData().getState() == SoldierData.STATE_PATROL) {
+                            cit.getSoldierData().addPatrolPoint(p3dPatrol);
+                        }
+                    }
+                }
+                item.getTask().setFinished(true);
+            } else if (item.getTask().getTask() == Task.TASK_SOLDIER_REMOVE_PATROL_POINT_ALL) {
+                // ELIMINAR PUNTO DE PATROL A TODOS LOS SOLDADOS
+                Point3DShort p3dPatrol = item.getTask().getPointIni().toPoint3DShort();
+                if (p3dPatrol != null) {
+                    Citizen cit;
+                    for (int j = 0; j < World.getSoldierIDs().size(); j++) {
+                        cit = (Citizen) World.getLivingEntityByID(World.getSoldierIDs().get(j));
+                        if (cit != null) {
+                            cit.getSoldierData().removePatrolPoint(p3dPatrol);
+                        }
+                    }
+                }
+                item.getTask().setFinished(true);
+            } else if (item.getTask().getTask() == Task.TASK_SOLDIER_SET_STATE_ALL) {
+                int newState = Integer.parseInt(item.getTask().getParameter2());
+                Citizen cit;
+                for (int j = 0; j < World.getSoldierIDs().size(); j++) {
+                    cit = (Citizen) World.getLivingEntityByID(World.getSoldierIDs().get(j));
+                    if (cit != null) {
+                        cit.getSoldierData().setState(newState, -1, cit.getID());
+                    }
+                }
                 item.getTask().setFinished(true);
             } else if (item.getTask().getTask() == Task.TASK_CHANGE_OWNER) {
                 // Cambiar el propietario de la zona personal

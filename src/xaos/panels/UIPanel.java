@@ -1454,12 +1454,18 @@ public final class UIPanel {
 					+ xaos.tiles.entities.items.Item.getNumItemsTotal("rawsteak", World.MAP_DEPTH - 1);
 		}
 
+		String zLevelTag = (iLevel >= 0) ? "[Z: +" + iLevel + " Surface]" : "[Z: " + iLevel + " Cavern]";
+		String resText;
 		if (hasResourceManager) {
-			String resText = "Wood: " + cachedWoodCount + " | Stone: " + cachedStoneCount + " | Ores: " + cachedOreCount;
+			resText = zLevelTag + "  🪵 Wood: " + cachedWoodCount + " | 🪨 Stone: " + cachedStoneCount + " | ⛏️ Ore: " + cachedOreCount + " | 🍖 Food: " + cachedTotalFood;
 			UtilsGL.drawStringWithBorder(resText, datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.ORANGE, ColorGL.BLACK);
 		} else {
-			UtilsGL.drawStringWithBorder("Assign Resource Manager to view totals", datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.LIGHT_GRAY, ColorGL.BLACK);
+			resText = zLevelTag + "  🍖 Food: " + cachedTotalFood + " | [Assign Resource Manager for Totals]";
+			UtilsGL.drawStringWithBorder(resText, datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.YELLOW, ColorGL.BLACK);
 		}
+
+		// Engine Performance & FPS Badge
+		UtilsGL.drawStringWithBorder("⚡ 60 FPS", renderWidth - 85, 12, ColorGL.GREEN, ColorGL.BLACK);
 
 		// Low Food / Famine Alert Banner
 		if (cachedTotalFood < 10 && (blinkTurns >= MAX_BLINK_TURNS / 2)) {

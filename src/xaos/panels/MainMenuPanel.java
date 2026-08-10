@@ -426,7 +426,12 @@ public final class MainMenuPanel implements Runnable {
         menuOptionsGraphics.addItem(menuAux);
         menuOptionsGraphics.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null));
 
-        menuAux = new SmartMenu(SmartMenu.TYPE_TEXT, "⚡ Render Engine: VBO Quad-Batching (Active)", null, null, null, null, null, Color.GREEN);
+        menuAux = new SmartMenu(SmartMenu.TYPE_TEXT, "⚡ Render Engine: Modern GL Quad Pipeline (Active)", null, null, null, null, null, Color.GREEN);
+        menuAux.setBorderColor(borderColor);
+        menuOptionsGraphics.addItem(menuAux);
+        menuOptionsGraphics.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null));
+
+        menuAux = new SmartMenu(SmartMenu.TYPE_TEXT, "🛡️ Collision Engine: Precision Wall & Corner Bounds", null, null, null, null, null, Color.CYAN);
         menuAux.setBorderColor(borderColor);
         menuOptionsGraphics.addItem(menuAux);
         menuOptionsGraphics.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, null, null, null, null));

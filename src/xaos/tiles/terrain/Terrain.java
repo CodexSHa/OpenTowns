@@ -581,6 +581,7 @@ public class Terrain implements Externalizable {
                     // Hay soldados con patrol, creamos el menú de poner punto de patrol
                     SmartMenu menuPatrols = new SmartMenu(SmartMenu.TYPE_MENU, Messages.getString("Terrain.9"), sm, null, null); //$NON-NLS-1$
 
+                    menuPatrols.addItem(new SmartMenu(SmartMenu.TYPE_ITEM, "All Patrol Soldiers", null, CommandPanel.COMMAND_ADD_PATROL_POINT_ALL, null, null, cell.getCoordinates().toPoint3D()));
                     for (int i = 0; i < alPatrolSoldiers.size(); i++) {
                         menuPatrols.addItem(new SmartMenu(SmartMenu.TYPE_ITEM, alPatrolSoldiers.get(i).getCitizenData().getFullName(), null, CommandPanel.COMMAND_ADD_PATROL_POINT, Integer.toString(alPatrolSoldiers.get(i).getID()), null, cell.getCoordinates().toPoint3D()));
                     }
@@ -599,6 +600,7 @@ public class Terrain implements Externalizable {
                 // Miramos si hay más de 1 aldeano con ese punto, para crear un menú lista (también miramos los grupos)
                 SmartMenu menuPatrols = new SmartMenu(SmartMenu.TYPE_MENU, Messages.getString("Terrain.10"), sm, null, null); //$NON-NLS-1$
 
+                menuPatrols.addItem(new SmartMenu(SmartMenu.TYPE_ITEM, "All Patrol Soldiers", null, CommandPanel.COMMAND_REMOVE_PATROL_POINT_ALL, null, null, cell.getCoordinates().toPoint3D()));
                 for (int i = 0; i < alPatrolSoldiers.size(); i++) {
                     if (alPatrolSoldiers.get(i).getSoldierData().getPatrolPoints().contains(cell.getCoordinates())) {
                         menuPatrols.addItem(new SmartMenu(SmartMenu.TYPE_ITEM, alPatrolSoldiers.get(i).getCitizenData().getFullName(), null, CommandPanel.COMMAND_REMOVE_PATROL_POINT, Integer.toString(alPatrolSoldiers.get(i).getID()), null, cell.getCoordinates().toPoint3D()));
