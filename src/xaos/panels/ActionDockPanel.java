@@ -107,31 +107,27 @@ public class ActionDockPanel {
 
         // Zones
         zonesActions.add(new ActionButton("Stockpile",  CommandPanel.COMMAND_STOCKPILE,                       "Z", "Designate resource storage area",      "ui_stockpile"));
-        zonesActions.add(new ActionButton("Bedroom",    CommandPanel.COMMAND_CREATE_ZONE, "zpersonal",        "B", "Designate settler living quarters",    "ui_zonespersonal"));
-        zonesActions.add(new ActionButton("Farm",       CommandPanel.COMMAND_BUILD,       "wheatfarm",        "F", "Designate crop field & farm plot",     "ui_harvest"));
-        zonesActions.add(new ActionButton("Barracks",   CommandPanel.COMMAND_CREATE_ZONE, "zbarracks",        "K", "Designate soldier training barracks",  "ui_zonesbarracks"));
+        zonesActions.add(new ActionButton("Carpentry",  CommandPanel.COMMAND_CREATE_ZONE, "zcarpentry",       "C", "Designate carpentry workshop zone",    "ui_zonescarpentry"));
+        zonesActions.add(new ActionButton("Masonry",    CommandPanel.COMMAND_CREATE_ZONE, "zmasonry",         "M", "Designate masonry workshop zone",      "ui_zonesmasonry"));
+        zonesActions.add(new ActionButton("Bakery",     CommandPanel.COMMAND_CREATE_ZONE, "zbakery",          "B", "Designate bakery workshop zone",       "ui_zonesbakery"));
+        zonesActions.add(new ActionButton("Forge",      CommandPanel.COMMAND_CREATE_ZONE, "zforge",           "G", "Designate forge / blacksmith zone",    "ui_zonesforge"));
+        zonesActions.add(new ActionButton("Kitchen",    CommandPanel.COMMAND_CREATE_ZONE, "zkitchen",         "K", "Designate kitchen cooking zone",       "ui_zoneskitchen"));
+        zonesActions.add(new ActionButton("Bedroom",    CommandPanel.COMMAND_CREATE_ZONE, "zpersonal",        "R", "Designate settler living quarters",    "ui_zonespersonal"));
         zonesActions.add(new ActionButton("Del Zone",   CommandPanel.COMMAND_DELETE_ZONE,                     "X", "Remove designated zone",               "ui_cancel"));
 
         // Structures
-        structuresActions.add(new ActionButton("Log Wall",  CommandPanel.COMMAND_QUEUE_AND_PLACE_AREA, "qlogwall",    "W", "Construct log walls",                  "ui_rwalls"));
-        structuresActions.add(new ActionButton("Door",      CommandPanel.COMMAND_CREATE_AND_PLACE,     "qwooddoor",   "G", "Place wooden door",                    "ui_rdoors"));
-        structuresActions.add(new ActionButton("Ladder",    CommandPanel.COMMAND_QUEUE_AND_PLACE_AREA, "qladder",     "S", "Build wooden ladder / stairs",         "ui_ladders"));
-        structuresActions.add(new ActionButton("Bed",       CommandPanel.COMMAND_CREATE_AND_PLACE,     "qbed",        "U", "Place wooden bed",                     "ui_sfurniture"));
-        structuresActions.add(new ActionButton("Dismantle", CommandPanel.COMMAND_DESTROY_BUILDING,                    "R", "Dismantle target structure",           "ui_destroyscaffold"));
+        structuresActions.add(new ActionButton("Walls",     "OPEN_RIGHT_CATEGORY", "walls",       "W", "Build log, wood & stone walls",        "ui_rwalls"));
+        structuresActions.add(new ActionButton("Roofs",     "OPEN_RIGHT_CATEGORY", "roof",        "R", "Build tile, straw & dome roofs",       "ui_roofs"));
+        structuresActions.add(new ActionButton("Doors",     "OPEN_RIGHT_CATEGORY", "doors",       "G", "Place wooden and iron doors",          "ui_rdoors"));
+        structuresActions.add(new ActionButton("Furniture", "OPEN_RIGHT_CATEGORY", "furniture",   "U", "Place beds, tables, chests & chairs",  "ui_sfurniture"));
+        structuresActions.add(new ActionButton("Dismantle", CommandPanel.COMMAND_DESTROY_BUILDING, "X", "Dismantle target structure",          "ui_destroyscaffold"));
 
         // Production
-        productionActions.add(new ActionButton("Recipes",   "OPEN_PRODUCTION",                                    "R", "Open crafting & recipes panel",        "ui_workshops"));
-        productionActions.add(new ActionButton("Food",      "OPEN_PRODUCTION_CATEGORY", "food",                  "F", "Craft bakery, pies, meat & rations",   "ui_rfood"));
-        productionActions.add(new ActionButton("Armory",    "OPEN_PRODUCTION_CATEGORY", "militaries",            "A", "Craft swords, shields & armor gear",   "ui_rarmor"));
-        productionActions.add(new ActionButton("Woodwork",  "OPEN_PRODUCTION_CATEGORY", "carpentry",             "W", "Craft barrels, containers & furniture","ui_zonescarpentry"));
-        productionActions.add(new ActionButton("Masonry",   "OPEN_PRODUCTION_CATEGORY", "masonry",               "M", "Craft stone blocks, columns & statues","ui_zonesforge"));
-
-        // Military
-        militaryActions.add(new ActionButton("Patrol",   CommandPanel.COMMAND_ADD_PATROL_POINT_ALL,                        "P", "Set defense waypoint for all soldiers", "ui_rmilitary"));
-        militaryActions.add(new ActionButton("Rally",    CommandPanel.COMMAND_ADD_PATROL_POINT,                            "A", "Rally militia to position",             "ui_sweapon"));
-        militaryActions.add(new ActionButton("Arena",    CommandPanel.COMMAND_CREATE_ZONE,          "zarena",              "V", "Establish guard arena perimeter",       "ui_zonesarena"));
-        militaryActions.add(new ActionButton("Hospital", CommandPanel.COMMAND_CREATE_ZONE,          "zhospital",           "R", "Designate healing hospital zone",       "ui_sarmor"));
-        militaryActions.add(new ActionButton("Weapons",  CommandPanel.COMMAND_QUEUE_AND_PLACE_AREA, "qwoodenweaponstand",  "W", "Place weapon stand for soldiers",       "ui_rweapons"));
+        productionActions.add(new ActionButton("Food",       "OPEN_PRODUCTION_CATEGORY", "food",       "F", "Craft bakery, pies, meat & rations",   "ui_rfood"));
+        productionActions.add(new ActionButton("Military",   "OPEN_PRODUCTION_CATEGORY", "militaries", "A", "Craft swords, shields & armor gear",   "ui_rmilitary"));
+        productionActions.add(new ActionButton("Utilities",  "OPEN_PRODUCTION_CATEGORY", "utils",      "U", "Craft tongs, carvers & torches",       "ui_rutils"));
+        productionActions.add(new ActionButton("Containers", "OPEN_PRODUCTION_CATEGORY", "containers", "C", "Craft barrels, chests & cabinets",     "ui_rcontainers"));
+        productionActions.add(new ActionButton("Materials",  "OPEN_PRODUCTION_CATEGORY", "materials",  "M", "Refine wood, bamboo, glass & wool",    "ui_rmaterials"));
     }
 
     // -------------------------------------------------------------------------
@@ -197,16 +193,28 @@ public class ActionDockPanel {
                             ProductionUIPanel.setProductionPanelActive(true);
                             ProductionUIPanel.setProductionPanelLocked(true);
                             if (ProductionUIPanel.productionPanelMenu != null && btn.parameter != null) {
-                                // If inside a sub-menu, go to root first
-                                while (ProductionUIPanel.productionPanelMenu.getParent() != null) {
-                                    ProductionUIPanel.productionPanelMenu = ProductionUIPanel.productionPanelMenu.getParent();
+                                SmartMenu root = ProductionUIPanel.productionPanelMenu;
+                                while (root.getParent() != null) {
+                                    root = root.getParent();
                                 }
-                                for (SmartMenu sm : ProductionUIPanel.productionPanelMenu.getItems()) {
-                                    if (sm.getID() != null && sm.getID().equalsIgnoreCase(btn.parameter)) {
-                                        ProductionUIPanel.productionPanelMenu = sm;
-                                        ProductionUIPanel.createProductionPanel(sm);
-                                        break;
-                                    }
+                                SmartMenu targetMenu = findMenu(root, btn.parameter);
+                                if (targetMenu != null) {
+                                    ProductionUIPanel.productionPanelMenu = targetMenu;
+                                    ProductionUIPanel.createProductionPanel(targetMenu);
+                                }
+                            }
+                        } else if (btn.command.equals("OPEN_RIGHT_CATEGORY")) {
+                            RightMenuUIPanel.setMenuPanelActive(true);
+                            RightMenuUIPanel.setMenuPanelLocked(true);
+                            if (RightMenuUIPanel.menuPanelMenu != null && btn.parameter != null) {
+                                SmartMenu root = RightMenuUIPanel.menuPanelMenu;
+                                while (root.getParent() != null) {
+                                    root = root.getParent();
+                                }
+                                SmartMenu targetMenu = findMenu(root, btn.parameter);
+                                if (targetMenu != null) {
+                                    RightMenuUIPanel.menuPanelMenu = targetMenu;
+                                    UIPanel.createMenuPanel(targetMenu);
                                 }
                             }
                         } else {
@@ -426,5 +434,20 @@ public class ActionDockPanel {
         GL11.glVertex2f(x,     y + h);
         GL11.glEnd();
         GL11.glLineWidth(1.0f);
+    }
+
+    private static SmartMenu findMenu(SmartMenu root, String target) {
+        if (root == null || target == null) return null;
+        if ((root.getParameter() != null && root.getParameter().equalsIgnoreCase(target)) ||
+            (root.getID() != null && root.getID().equalsIgnoreCase(target))) {
+            return root;
+        }
+        if (root.getItems() != null) {
+            for (SmartMenu child : root.getItems()) {
+                SmartMenu found = findMenu(child, target);
+                if (found != null) return found;
+            }
+        }
+        return null;
     }
 }

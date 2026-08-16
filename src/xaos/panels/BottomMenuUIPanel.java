@@ -3,7 +3,6 @@ package xaos.panels;
 import java.awt.Point;
 import java.util.ArrayList;
 import org.lwjgl.opengl.GL11;
-import xaos.campaign.TutorialFlow;
 import xaos.panels.menus.SmartMenu;
 import xaos.tiles.Tile;
 import xaos.utils.UtilsGL;
@@ -125,11 +124,14 @@ public final class BottomMenuUIPanel {
 			GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 			GL11.glEnable (GL11.GL_TEXTURE_2D);
 
-			// Icono
+			// Icono (UI or Item)
 			Tile tile = currentMenu.getItems ().get (i).getIcon ();
-			if (tile != null && currentMenu.getItems ().get (i).getIconType () == SmartMenu.ICON_TYPE_UI) {
-				iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
+			if (tile != null) {
+				GL11.glBindTexture (GL11.GL_TEXTURE_2D, tile.getTextureID ());
+				GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+				UtilsGL.glBegin (GL11.GL_QUADS);
 				UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomPanel == (i - bottomPanelItemIndex)));
+				UtilsGL.glEnd ();
 			}
 		}
 
@@ -144,7 +146,12 @@ public final class BottomMenuUIPanel {
 		}
 		if (bottomSubPanelMenu != null) {
 			// Pintamos el panel
+			int iCurrentTextureSub = tileBottomSubPanel[0].getTextureID ();
+			GL11.glBindTexture (GL11.GL_TEXTURE_2D, iCurrentTextureSub);
+			GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+			UtilsGL.glBegin (GL11.GL_QUADS);
 			UIPanel.renderBackground (tileBottomSubPanel, bottomSubPanelPoint, BOTTOM_SUBPANEL_WIDTH, BOTTOM_SUBPANEL_HEIGHT);
+			UtilsGL.glEnd ();
 
 			// Pintamos los items
 			int iMenu;
@@ -192,51 +199,13 @@ public final class BottomMenuUIPanel {
 					GL11.glEnable (GL11.GL_TEXTURE_2D);
 
 					// Icono
-					Tile tile = bottomSubPanelMenu.getItems ().get (iMenu).getIcon ();
-					if (tile != null && bottomSubPanelMenu.getItems ().get (iMenu).getIconType () == SmartMenu.ICON_TYPE_UI) {
-						iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
-						UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
-					}
-				}
-			}
-		}
-
-		/*
-		 * ITEMS
-		 */
-		// BOTTOM PANEL
-		for (int i = bottomPanelItemIndex; i < bottomPanelItemIndex + BOTTOM_PANEL_NUM_ITEMS; i++) {
-			if (i > currentMenu.getItems ().size ()) {
-				break;
-			}
-
-			point = bottomPanelItemsPosition.get (i - bottomPanelItemIndex);
-			// Icono
-			Tile tile = currentMenu.getItems ().get (i).getIcon ();
-			if (tile != null && currentMenu.getItems ().get (i).getIconType () == SmartMenu.ICON_TYPE_ITEM) {
-				iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
-				UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomPanel == (i - bottomPanelItemIndex)));
-			}
-		}
-
-		// BOTTOM SUBPANEL
-		if (bottomSubPanelMenu != null) {
-			// Ahora los items
-			int iMenu;
-			Tile tile;
-			bucle1: for (int y = 0; y < BOTTOM_SUBPANEL_NUM_ITEMS_Y; y++) {
-				for (int x = 0; x < BOTTOM_SUBPANEL_NUM_ITEMS_X; x++) {
-					iMenu = (y * BOTTOM_SUBPANEL_NUM_ITEMS_X) + x;
-					if (iMenu >= bottomSubPanelMenu.getItems ().size ()) {
-						break bucle1;
-					}
-
-					point = bottomSubPanelItemsPosition.get (iMenu);
-					// Icono
-					tile = bottomSubPanelMenu.getItems ().get (iMenu).getIcon ();
-					if (tile != null && bottomSubPanelMenu.getItems ().get (iMenu).getIconType () == SmartMenu.ICON_TYPE_ITEM) {
-						iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
-						UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
+					Tile subTile = bottomSubPanelMenu.getItems ().get (iMenu).getIcon ();
+					if (subTile != null) {
+						GL11.glBindTexture (GL11.GL_TEXTURE_2D, subTile.getTextureID ());
+						GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+						UtilsGL.glBegin (GL11.GL_QUADS);
+						UIPanel.drawTile (subTile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
+						UtilsGL.glEnd ();
 					}
 				}
 			}

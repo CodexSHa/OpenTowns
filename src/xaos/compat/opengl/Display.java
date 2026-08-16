@@ -224,7 +224,7 @@ public final class Display {
         }
 
         GLFW.glfwDefaultWindowHints();
-        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_FALSE);
+        GLFW.glfwWindowHint(GLFW.GLFW_VISIBLE, GLFW.GLFW_TRUE);
         GLFW.glfwWindowHint(GLFW.GLFW_RESIZABLE, resizable ? GLFW.GLFW_TRUE : GLFW.GLFW_FALSE);
         // No context version/profile hints: request a legacy-compatible
         // context for the game's immediate-mode rendering.
@@ -295,7 +295,10 @@ public final class Display {
         Keyboard.install(window);
         Mouse.install(window);
 
+        GLFW.glfwRestoreWindow(window);
         GLFW.glfwShowWindow(window);
+        GLFW.glfwFocusWindow(window);
+        GLFW.glfwRequestWindowAttention(window);
         created = true;
     }
 

@@ -48,12 +48,12 @@ public final class RightMenuUIPanel {
 		checkBlinkRight = (UIPanel.blinkTurns >= UIPanel.MAX_BLINK_TURNS / 2) && TutorialFlow.isBlinkRight ();
 
 		if (isMenuPanelActive ()) {
-			// XAVI GL11.glColor4f (1, 1, 1, 1);
 			int iCurrentTexture = tileMenuPanel[0].getTextureID ();
 			GL11.glBindTexture (GL11.GL_TEXTURE_2D, iCurrentTexture);
 			GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 			UtilsGL.glBegin (GL11.GL_QUADS);
 			UIPanel.renderBackground (tileMenuPanel, menuPanelPoint, MENU_PANEL_WIDTH, MENU_PANEL_HEIGHT);
+			UtilsGL.glEnd ();
 
 			int iItemMenu;
 			if (mousePanel == UIPanel.MOUSE_MENU_PANEL_ITEMS) {
@@ -108,39 +108,18 @@ public final class RightMenuUIPanel {
 						GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 						GL11.glEnable (GL11.GL_TEXTURE_2D);
 
-						// Icono
+						// Icono (UI or Item)
 						Tile tile = menuPanelMenu.getItems ().get (iMenu).getIcon ();
-						if (tile != null && menuPanelMenu.getItems ().get (iMenu).getIconType () == SmartMenu.ICON_TYPE_UI) { // MENU
-							iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
+						if (tile != null) {
+							GL11.glBindTexture (GL11.GL_TEXTURE_2D, tile.getTextureID ());
+							GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+							UtilsGL.glBegin (GL11.GL_QUADS);
 							UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemMenu == iMenu));
+							UtilsGL.glEnd ();
 						}
 					}
 				}
 			}
-
-			// MENU
-			if (menuPanelMenu != null) {
-				int iMenu;
-				Tile tile;
-				Point point;
-				bucle1: for (int y = 0; y < MENU_PANEL_NUM_ITEMS_Y; y++) {
-					for (int x = 0; x < MENU_PANEL_NUM_ITEMS_X; x++) {
-						iMenu = (y * MENU_PANEL_NUM_ITEMS_X) + x;
-						if (iMenu >= menuPanelMenu.getItems ().size ()) {
-							break bucle1;
-						}
-						point = menuPanelItemsPosition.get (iMenu);
-						// Icono
-						tile = menuPanelMenu.getItems ().get (iMenu).getIcon ();
-						if (tile != null && menuPanelMenu.getItems ().get (iMenu).getIconType () == SmartMenu.ICON_TYPE_ITEM) { // ICONO
-							iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
-							UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemMenu == iMenu));
-						}
-					}
-				}
-			}
-
-			UtilsGL.glEnd ();
 		}
 
 		// Botoncito open/close

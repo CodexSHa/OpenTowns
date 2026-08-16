@@ -995,10 +995,7 @@ public final class Game {
 
 		if (getCurrentContextMenu () != null) {
 			setCurrentState (STATE_SHOWING_CONTEXT_MENU);
-			int mouseX = xaos.compat.input.Mouse.getX();
-			int mouseY = xaos.compat.opengl.Display.getHeight() - xaos.compat.input.Mouse.getY() - 1;
-			Point3D tile = (menu.getSmartMenu() != null) ? menu.getSmartMenu().getDirectCoordinates() : null;
-			xaos.panels.RadialMenuPanel.open(mouseX, mouseY, tile);
+			xaos.panels.RadialMenuPanel.close ();
 		}
 	}
 
@@ -1051,6 +1048,7 @@ public final class Game {
 	public static void deleteCurrentContextMenu () {
 		setCurrentState (STATE_NO_STATE);
 		currentContextMenu = null;
+		xaos.panels.RadialMenuPanel.close ();
 	}
 
 
@@ -1161,15 +1159,14 @@ public final class Game {
 					// Botón izquierdo pulsado, miramos a qué panel pertenece y llamamos a su función mousePressed (x, y) (con x e y relativas al panel)
 					// Primero miramos que no haya un contextmenu
 					if (getCurrentState () == STATE_SHOWING_CONTEXT_MENU) {
-						if (xaos.panels.RadialMenuPanel.isActive ()) {
+						// Context menú, miramos donde clica
+						if (getCurrentContextMenu () != null && mouseX >= getCurrentContextMenu ().getX () && mouseX < (getCurrentContextMenu ().getX () + getCurrentContextMenu ().getWidth ()) && mouseY >= getCurrentContextMenu ().getY () && mouseY < (getCurrentContextMenu ().getY () + getCurrentContextMenu ().getHeight ())) {
+							getCurrentContextMenu ().mousePressed (mouseX - getCurrentContextMenu ().getX (), mouseY - getCurrentContextMenu ().getY ());
+						} else if (xaos.panels.RadialMenuPanel.isActive ()) {
 							if (xaos.panels.RadialMenuPanel.handleClick (mouseX, mouseY)) {
 								deleteCurrentContextMenu ();
 								continue;
 							}
-						}
-						// Context menú, miramos donde clica
-						if (getCurrentContextMenu () != null && mouseX >= getCurrentContextMenu ().getX () && mouseX < (getCurrentContextMenu ().getX () + getCurrentContextMenu ().getWidth ()) && mouseY >= getCurrentContextMenu ().getY () && mouseY < (getCurrentContextMenu ().getY () + getCurrentContextMenu ().getHeight ())) {
-							getCurrentContextMenu ().mousePressed (mouseX - getCurrentContextMenu ().getX (), mouseY - getCurrentContextMenu ().getY ());
 						} else {
 							// Cierra el menú
 							deleteCurrentContextMenu ();
@@ -1341,18 +1338,42 @@ public final class Game {
 						xaos.panels.UIPanel.showPerformanceHUD = !xaos.panels.UIPanel.showPerformanceHUD;
 					}
 
-					if (iKEY == Keyboard.KEY_ESCAPE && getCurrentState () == STATE_SHOWING_CONTEXT_MENU) {
-						// Back al contextMenu
-						if (currentContextMenu.getSmartMenu ().getParent () == null) {
-							// No hay back posible, lo borramos
-							currentContextMenu = null;
-							setCurrentState (STATE_NO_STATE);
-						} else {
-							// Back
-							currentContextMenu.setSmartMenu (currentContextMenu.getSmartMenu ().getParent ());
+					if (iKEY == Keyboard.KEY_ESCAPE) {
+						if (xaos.panels.RadialMenuPanel.isActive ()) {
+							xaos.panels.RadialMenuPanel.close ();
+							continue;
 						}
-						// } else if (iKEY == Keyboard.KEY_ESCAPE && getCurrentState() == STATE_SHOWING_INFO_PANEL) {
-						// closeInfoPanel();
+						if (xaos.panels.CitizenInspectorPanel.getInspectedEntity () != null) {
+							xaos.panels.CitizenInspectorPanel.setInspectedEntity (null);
+							continue;
+						}
+						if (TradeUIPanel.isTradePanelActive ()) {
+							TradeUIPanel.setTradePanelActive (false);
+							continue;
+						}
+						if (PrioritiesUIPanel.isPrioritiesPanelActive ()) {
+							PrioritiesUIPanel.setPrioritiesPanelActive (false);
+							continue;
+						}
+						if (MatsUIPanel.isMatsPanelActive ()) {
+							MatsUIPanel.setMatsPanelActive (false);
+							continue;
+						}
+						if (getCurrentState () == STATE_CREATING_TASK) {
+							deleteCurrentTask ();
+							continue;
+						}
+						if (getCurrentState () == STATE_SHOWING_CONTEXT_MENU) {
+							if (currentContextMenu != null && currentContextMenu.getSmartMenu () != null && currentContextMenu.getSmartMenu ().getParent () != null) {
+								currentContextMenu.setSmartMenu (currentContextMenu.getSmartMenu ().getParent ());
+							} else {
+								deleteCurrentContextMenu ();
+							}
+							continue;
+						}
+						// If no modal or menu is open, cleanly open the Escape Options Menu
+						CommandPanel.executeCommand (CommandPanel.COMMAND_EXIT_TO_MAIN_MENU, null, null, null, null, 0);
+						continue;
 					} else {
 						// Función
 						int iFN = UtilsKeyboard.getFN (iKEY);

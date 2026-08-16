@@ -1,17 +1,14 @@
 package xaos.panels;
 
-import java.util.ArrayList;
 import org.lwjgl.opengl.GL11;
 import xaos.compat.opengl.Display;
 import xaos.data.LivingEntityData;
 import xaos.main.Game;
 import xaos.tiles.Tile;
-import xaos.tiles.entities.items.Item;
 import xaos.tiles.entities.living.Citizen;
 import xaos.tiles.entities.living.LivingEntity;
 import xaos.utils.ColorGL;
 import xaos.utils.Point3DShort;
-import xaos.utils.UtilFont;
 import xaos.utils.UtilsGL;
 
 public class CitizenInspectorPanel {

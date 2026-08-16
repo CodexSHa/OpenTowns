@@ -18,12 +18,12 @@ import xaos.utils.ImageData;
 import xaos.utils.Point3D;
 import xaos.utils.Point3DShort;
 import xaos.utils.TextureData;
-import xaos.utils.UtilFont;
 import xaos.utils.UtilsGL;
 
 public final class MiniMapPanel {
 
     private static TextureData[] minimapTextures;
+    @SuppressWarnings("unused")
     private static final Tile YELLOW_TILE = new Tile("ui_yellow"); //$NON-NLS-1$
 
     public static int renderX;

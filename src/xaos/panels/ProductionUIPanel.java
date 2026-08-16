@@ -83,12 +83,12 @@ public final class ProductionUIPanel {
 		checkBlinkProduction = (UIPanel.blinkTurns >= UIPanel.MAX_BLINK_TURNS / 2) && TutorialFlow.isBlinkProduction ();
 
 		if (isProductionPanelActive ()) {
-			int iCurrentTexture = tileProductionPanel[0].getTextureID ();
-			GL11.glBindTexture (GL11.GL_TEXTURE_2D, iCurrentTexture);
+			// Background
+			GL11.glBindTexture (GL11.GL_TEXTURE_2D, tileProductionPanel[0].getTextureID ());
 			GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 			UtilsGL.glBegin (GL11.GL_QUADS);
-
 			UIPanel.renderBackground (tileProductionPanel, productionPanelPoint, PRODUCTION_PANEL_WIDTH, PRODUCTION_PANEL_HEIGHT);
+			UtilsGL.glEnd ();
 
 			// Items
 			int iMenu;
@@ -102,7 +102,6 @@ public final class ProductionUIPanel {
 			}
 
 			if (productionPanelMenu != null) {
-				Tile tile;
 				bucle1: for (int y = 0; y < PRODUCTION_PANEL_NUM_ITEMS_Y; y++) {
 					for (int x = 0; x < PRODUCTION_PANEL_NUM_ITEMS_X; x++) {
 						iMenu = (y * PRODUCTION_PANEL_NUM_ITEMS_X) + x;
@@ -110,113 +109,68 @@ public final class ProductionUIPanel {
 							break bucle1;
 						}
 						smItem = productionPanelMenu.getItems ().get (iMenu);
-
 						point = productionPanelItemsPosition.get (iMenu);
-						boolean bBlinkItem = checkBlinkProduction && TutorialFlow.currentBlinkProduction (productionPanelMenu.getItems ().get (iMenu).getID ());
+						boolean bBlinkItem = checkBlinkProduction && TutorialFlow.currentBlinkProduction (smItem.getID ());
 						TutorialFlow tutFlow = null;
 						if (bBlinkItem && Game.getCurrentMissionData () != null && ImagesPanel.getCurrentFlowIndex () >= 0 && ImagesPanel.getCurrentFlowIndex () < Game.getCurrentMissionData ().getTutorialFlows ().size ()) {
 							tutFlow = Game.getCurrentMissionData ().getTutorialFlows ().get (ImagesPanel.getCurrentFlowIndex ());
 						}
 
-						// Round button
-						if (productionPanelMenu.getItems ().get (iMenu).getType () == SmartMenu.TYPE_MENU) {
-							iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItemSM, iCurrentTexture);
-							if (bBlinkItem) {
-								UtilsGL.setColorRed ();
-								UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
-								UtilsGL.unsetColor ();
-							} else {
-								UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
-							}
+						// 1. Slot background
+						Tile bgTile = (smItem.getType () == SmartMenu.TYPE_MENU) ? UIPanel.tileBottomItemSM : UIPanel.tileBottomItem;
+						GL11.glBindTexture (GL11.GL_TEXTURE_2D, bgTile.getTextureID ());
+						GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+						UtilsGL.glBegin (GL11.GL_QUADS);
+						if (bBlinkItem) {
+							UtilsGL.setColorRed ();
+							UIPanel.drawTile (bgTile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
+							UtilsGL.unsetColor ();
 						} else {
-							iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItem, iCurrentTexture);
-							if (bBlinkItem) {
-								UtilsGL.setColorRed ();
-								UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
-								UtilsGL.unsetColor ();
-							} else {
-								UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
-							}
+							UIPanel.drawTile (bgTile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
 						}
+						UtilsGL.glEnd ();
 
-						// Icono
-						tile = productionPanelMenu.getItems ().get (iMenu).getIcon ();
-						if (tile != null && productionPanelMenu.getItems ().get (iMenu).getIconType () == SmartMenu.ICON_TYPE_UI) {
-							iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
+						// 2. Icon (renders both UI and ITEM icons directly!)
+						Tile tile = smItem.getIcon ();
+						if (tile != null) {
+							GL11.glBindTexture (GL11.GL_TEXTURE_2D, tile.getTextureID ());
+							GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+							UtilsGL.glBegin (GL11.GL_QUADS);
 							UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
+							UtilsGL.glEnd ();
 						}
 
+						// 3. Plus & Minus quantity adjuster buttons
 						point = productionPanelItemsPlusRegularPosition.get (iMenu);
 						if (point.x != -1) {
-							// Regular
-							iCurrentTexture = UtilsGL.setTexture (tileProductionPanelPlusIcon, iCurrentTexture);
-							if (tutFlow != null && tutFlow.isBlinkProductionRegularPlus ()) {
-								UtilsGL.setColorRed ();
-							}
+							// Plus regular & automated
+							GL11.glBindTexture (GL11.GL_TEXTURE_2D, tileProductionPanelPlusIcon.getTextureID ());
+							GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+							UtilsGL.glBegin (GL11.GL_QUADS);
+							if (tutFlow != null && tutFlow.isBlinkProductionRegularPlus ()) UtilsGL.setColorRed ();
 							UIPanel.drawTile (tileProductionPanelPlusIcon, point, UIPanel.ICON_WIDTH, UIPanel.ICON_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS_PLUS_REGULAR && pItem.y == iMenu));
-							if (tutFlow != null && tutFlow.isBlinkProductionRegularPlus ()) {
-								UtilsGL.unsetColor ();
-							}
+							if (tutFlow != null && tutFlow.isBlinkProductionRegularPlus ()) UtilsGL.unsetColor ();
 
-							// Automated
-							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedPlus ()) {
-								UtilsGL.setColorRed ();
-							}
+							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedPlus ()) UtilsGL.setColorRed ();
 							UIPanel.drawTile (tileProductionPanelPlusIcon, productionPanelItemsPlusAutomatedPosition.get (iMenu), UIPanel.ICON_WIDTH, UIPanel.ICON_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS_PLUS_AUTOMATED && pItem.y == iMenu));
-							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedPlus ()) {
-								UtilsGL.unsetColor ();
-							}
+							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedPlus ()) UtilsGL.unsetColor ();
+							UtilsGL.glEnd ();
 
-							iCurrentTexture = UtilsGL.setTexture (tileProductionPanelMinusIcon, iCurrentTexture);
-
-							// Regular
-							if (tutFlow != null && tutFlow.isBlinkProductionRegularMinus ()) {
-								UtilsGL.setColorRed ();
-							}
+							// Minus regular & automated
+							GL11.glBindTexture (GL11.GL_TEXTURE_2D, tileProductionPanelMinusIcon.getTextureID ());
+							GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+							UtilsGL.glBegin (GL11.GL_QUADS);
+							if (tutFlow != null && tutFlow.isBlinkProductionRegularMinus ()) UtilsGL.setColorRed ();
 							UIPanel.drawTile (tileProductionPanelMinusIcon, productionPanelItemsMinusRegularPosition.get (iMenu), UIPanel.ICON_WIDTH, UIPanel.ICON_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS_MINUS_REGULAR && pItem.y == iMenu));
-							if (tutFlow != null && tutFlow.isBlinkProductionRegularMinus ()) {
-								UtilsGL.unsetColor ();
-							}
+							if (tutFlow != null && tutFlow.isBlinkProductionRegularMinus ()) UtilsGL.unsetColor ();
 
-							// Automated
-							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedMinus ()) {
-								UtilsGL.setColorRed ();
-							}
+							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedMinus ()) UtilsGL.setColorRed ();
 							UIPanel.drawTile (tileProductionPanelMinusIcon, productionPanelItemsMinusAutomatedPosition.get (iMenu), UIPanel.ICON_WIDTH, UIPanel.ICON_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS_MINUS_AUTOMATED && pItem.y == iMenu));
-							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedMinus ()) {
-								UtilsGL.unsetColor ();
-							}
+							if (tutFlow != null && tutFlow.isBlinkProductionAutomatedMinus ()) UtilsGL.unsetColor ();
+							UtilsGL.glEnd ();
 						}
 					}
 				}
-			}
-			UtilsGL.glEnd ();
-
-			/*
-			 * ITEMS TEXTURES
-			 */
-			if (productionPanelMenu != null) {
-				iCurrentTexture = Game.TEXTURE_FONT_ID;
-				GL11.glBindTexture (GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
-				GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-				UtilsGL.glBegin (GL11.GL_QUADS);
-
-				bucle1: for (int y = 0; y < PRODUCTION_PANEL_NUM_ITEMS_Y; y++) {
-					for (int x = 0; x < PRODUCTION_PANEL_NUM_ITEMS_X; x++) {
-						iMenu = (y * PRODUCTION_PANEL_NUM_ITEMS_X) + x;
-						if (iMenu >= productionPanelMenu.getItems ().size ()) {
-							break bucle1;
-						}
-						point = productionPanelItemsPosition.get (iMenu);
-						// Icono
-						Tile tile = productionPanelMenu.getItems ().get (iMenu).getIcon ();
-						if (tile != null && productionPanelMenu.getItems ().get (iMenu).getIconType () == SmartMenu.ICON_TYPE_ITEM) {
-							iCurrentTexture = UtilsGL.setTexture (tile, iCurrentTexture);
-							UIPanel.drawTile (tile, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (pItem != null && pItem.x == UIPanel.MOUSE_PRODUCTION_PANEL_ITEMS && pItem.y == iMenu));
-						}
-					}
-				}
-				UtilsGL.glEnd ();
 			}
 
 			/*

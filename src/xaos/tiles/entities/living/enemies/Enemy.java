@@ -300,9 +300,11 @@ public class Enemy extends LivingEntity {
                         }
                         sm.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, "", null, null, null)); //$NON-NLS-1$
                     }
-                    if (TownsProperties.DEBUG_MODE && enemy.getSiegeData() != null) {
-                        sm.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, "siegeType " + enemy.getSiegeData().getType(), null, null, null, null, p3d)); //$NON-NLS-1$
-                        sm.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, "siegeCount " + enemy.getSiegeData().getCount(), null, null, null, null, p3d)); //$NON-NLS-1$
+                    if (TownsProperties.DEBUG_MODE) {
+                        if (enemy.getSiegeData() != null) {
+                            sm.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, "siegeType " + enemy.getSiegeData().getType(), null, null, null, null, p3d)); //$NON-NLS-1$
+                            sm.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, "siegeCount " + enemy.getSiegeData().getCount(), null, null, null, null, p3d)); //$NON-NLS-1$
+                        }
                     }
 
                     sm.addItem(new SmartMenu(SmartMenu.TYPE_TEXT, le.getLivingEntityData().toString(), null, null, null));

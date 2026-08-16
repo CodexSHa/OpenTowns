@@ -127,6 +127,7 @@ public final class UtilsGL {
 		}
 
 		initGLModes ();
+		xaos.graphics.shaders.ShaderManager.init ();
 	}
 
 
@@ -1373,6 +1374,7 @@ public final class UtilsGL {
 	}
 
 	public static void destroy () {
+		xaos.graphics.shaders.ShaderManager.destroy ();
 		Display.destroy ();
 	}
 }

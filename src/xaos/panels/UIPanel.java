@@ -8,26 +8,21 @@ import xaos.compat.input.Keyboard;
 import xaos.compat.input.Mouse;
 import org.lwjgl.opengl.GL11;
 
-import xaos.TownsProperties;
 import xaos.actions.ActionManager;
 import xaos.actions.ActionManagerItem;
 import xaos.actions.ActionPriorityManager;
-import xaos.campaign.TutorialFlow;
 import xaos.campaign.TutorialTrigger;
 import xaos.data.CaravanData;
 import xaos.data.CitizenGroupData;
 import xaos.data.CitizenGroups;
 import xaos.data.EffectData;
 import xaos.data.EquippedData;
-import xaos.data.EventData;
 import xaos.data.GlobalEventData;
 import xaos.data.HeroData;
 import xaos.data.SoldierData;
 import xaos.data.SoldierGroupData;
 import xaos.data.SoldierGroups;
 import xaos.effects.EffectManager;
-import xaos.events.EventManager;
-import xaos.events.EventManagerItem;
 import xaos.main.Game;
 import xaos.main.World;
 import xaos.panels.menus.ContextMenu;
@@ -51,6 +46,7 @@ import xaos.utils.UtilsGL;
 import xaos.utils.UtilsKeyboard;
 
 
+@SuppressWarnings("unused")
 public final class UIPanel {
 
 	public static boolean showPerformanceHUD = false;
@@ -147,11 +143,6 @@ public final class UIPanel {
 	public final static int MOUSE_EVENTS_ICON = 107;
 	// public final static int MOUSE_GODS_ICON = 108;
 	public final static int MOUSE_TUTORIAL_ICON = 109;
-
-	private static int cachedWoodCount = 0;
-	private static int cachedStoneCount = 0;
-	private static int cachedOreCount = 0;
-	private static int cachedTotalFood = 100;
 
 	public final static int MOUSE_ICON_MATS = 120;
 	public final static int MOUSE_MATS_PANEL = 121;
@@ -299,8 +290,8 @@ public final class UIPanel {
 	private static Tile tileBottomSubItem;
 
 	// MINIMAP panel
-	private int minimapPanelX;
-	private int minimapPanelY;
+	public static int minimapPanelX;
+	public static int minimapPanelY;
 
 	public static Tile tileMinimapPanel;
 	public static boolean tileMinimapPanelAlpha[][];
@@ -2175,164 +2166,7 @@ public final class UIPanel {
 					UtilsGL.drawTooltip (tooltip, tooltipX, tooltipY, renderWidth, renderHeight);
 				}
 			} else if (mousePanel == MOUSE_EVENTS_ICON) {
-				ArrayList<EventData> alEvents = Game.getWorld ().getEvents ();
-				if (alEvents.size () == 0) {
-					tooltip = Messages.getString ("UIPanel.83"); //$NON-NLS-1$
-					UtilsGL.drawTooltip (tooltip, iconEventsPoint.x + GlobalEventData.getIcon ().getTileWidth () / 2 - UtilFont.getWidth (tooltip) / 2, iconEventsPoint.y + GlobalEventData.getIcon ().getTileHeight (), renderWidth, renderHeight);
-				} else {
-					// Obtenemos el tamaño del tooltip
-					tooltip = Messages.getString ("UIPanel.84"); //$NON-NLS-1$
-					int tooltipWidth = UtilFont.getWidth (tooltip);
-					int tooltipHeight = UtilFont.MAX_HEIGHT; // Título
-
-					EventData ed;
-					EventManagerItem emi;
-					int iAux;
-					for (int i = 0; i < alEvents.size (); i++) {
-						ed = alEvents.get (i);
-						emi = EventManager.getItem (ed.getEventID ());
-						if (emi != null) {
-							// Alto
-							if (emi.getIcon () != null) {
-								tooltipHeight += emi.getIcon ().getTileHeight () + 2;
-
-								// Ancho
-								iAux = UtilFont.getWidth (emi.getName ()) + emi.getIcon ().getTileWidth ();
-								if (iAux > tooltipWidth) {
-									tooltipWidth = iAux;
-								}
-							} else {
-								tooltipHeight += UtilFont.MAX_HEIGHT + 2;
-
-								// Ancho
-								iAux = UtilFont.getWidth (emi.getName ());
-								if (iAux > tooltipWidth) {
-									tooltipWidth = iAux;
-								}
-							}
-						}
-					}
-					tooltipX = iconEventsPoint.x + GlobalEventData.getIcon ().getTileWidth () / 2 - tooltipWidth / 2;
-					tooltipY = iconEventsPoint.y + GlobalEventData.getIcon ().getTileHeight ();
-
-					// Renderizamos
-					// Fondo
-					int iCurrentTexture = UIPanel.tileTooltipBackground.getTextureID ();
-					GL11.glColor4f (1, 1, 1, 1);
-					GL11.glBindTexture (GL11.GL_TEXTURE_2D, UIPanel.tileTooltipBackground.getTextureID ());
-					UtilsGL.glBegin (GL11.GL_QUADS);
-					UtilsGL.drawTexture (tooltipX, tooltipY - 4, tooltipX + tooltipWidth + 8, tooltipY + tooltipHeight + 4, UIPanel.tileTooltipBackground.getTileSetTexX0 (), UIPanel.tileTooltipBackground.getTileSetTexY0 (), UIPanel.tileTooltipBackground.getTileSetTexX1 (), UIPanel.tileTooltipBackground.getTileSetTexY1 ());
-
-					// Iconos
-					int iCurrentHeight = tooltipY + UtilFont.MAX_HEIGHT + 2;
-					for (int i = 0; i < alEvents.size (); i++) {
-						ed = alEvents.get (i);
-						emi = EventManager.getItem (ed.getEventID ());
-						if (emi != null) {
-							// Alto
-							if (emi.getIcon () != null) {
-								iCurrentTexture = UtilsGL.setTexture (emi.getIcon (), iCurrentTexture);
-								drawTile (emi.getIcon (), tooltipX, iCurrentHeight, false);
-								iCurrentHeight += emi.getIcon ().getTileHeight () + 2;
-							} else {
-								iCurrentHeight += UtilFont.MAX_HEIGHT + 2;
-							}
-						}
-					}
-					UtilsGL.glEnd ();
-
-					// Textos
-					GL11.glBindTexture (GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
-					UtilsGL.glBegin (GL11.GL_QUADS);
-					iCurrentHeight = tooltipY;
-					UtilsGL.drawString (tooltip, tooltipX, iCurrentHeight);
-					iCurrentHeight += UtilFont.MAX_HEIGHT + 2;
-
-					for (int i = 0; i < alEvents.size (); i++) {
-						ed = alEvents.get (i);
-						emi = EventManager.getItem (ed.getEventID ());
-						if (emi != null) {
-							// Alto
-							if (emi.getIcon () != null) {
-								UtilsGL.drawString (emi.getName (), tooltipX + emi.getIcon ().getTileWidth () + 4, iCurrentHeight + emi.getIcon ().getTileHeight () / 2 - UtilFont.MAX_HEIGHT / 2);
-								iCurrentHeight += emi.getIcon ().getTileHeight () + 2;
-							} else {
-								UtilsGL.drawString (emi.getName (), tooltipX, iCurrentHeight);
-								iCurrentHeight += UtilFont.MAX_HEIGHT + 2;
-							}
-						}
-					}
-
-					UtilsGL.glEnd ();
-				}
-				// } else if (mousePanel == MOUSE_GODS_ICON) {
-				// ArrayList<GodData> alGods = Game.getWorld ().getGods ();
-				// int iNonHidden = 0;
-				// for (int i = 0; i < alGods.size (); i++) {
-				// if (!alGods.get (i).isHidden ()) {
-				// iNonHidden++;
-				// }
-				// }
-				// if (iNonHidden == 0) {
-				//					tooltip = Messages.getString("UIPanel.77"); //$NON-NLS-1$
-				// UtilsGL.drawTooltip (tooltip, iconGodsPoint.x + tileIconGods.getTileWidth () / 2 - UtilFont.getWidth (tooltip) / 2, iconGodsPoint.y + tileIconGods.getTileHeight (), renderWidth, renderHeight);
-				// } else {
-				// // Obtenemos el tamaño del tooltip
-				//					tooltip = Messages.getString("UIPanel.78"); //$NON-NLS-1$
-				// int tooltipWidth = UtilFont.getWidth (tooltip);
-				// int tooltipHeight = UtilFont.MAX_HEIGHT; // Título
-				//
-				// GodData gd;
-				// int iAux;
-				// // Alto
-				// tooltipHeight += iNonHidden * UtilFont.MAX_HEIGHT + 2;
-				// for (int i = 0; i < alGods.size (); i++) {
-				// gd = alGods.get (i);
-				// if (!gd.isHidden ()) {
-				// // Ancho
-				// if (Game.DEBUG_MODE) {
-				//								iAux = UtilFont.getWidth (gd.getFullName () + " (" + gd.getStatus () + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-				// } else {
-				// iAux = UtilFont.getWidth (gd.getFullName ());
-				// }
-				//
-				// if (iAux > tooltipWidth) {
-				// tooltipWidth = iAux;
-				// }
-				// }
-				// }
-				//
-				// tooltipX = iconGodsPoint.x + tileIconGods.getTileWidth () / 2 - tooltipWidth / 2;
-				// tooltipY = iconGodsPoint.y + tileIconGods.getTileHeight ();
-				//
-				// // Renderizamos
-				// // Fondo
-				// GL11.glColor4f (1, 1, 1, 1);
-				// GL11.glBindTexture (GL11.GL_TEXTURE_2D, UIPanel.tileTooltipBackground.getTextureID ());
-				// UtilsGL.glBegin (GL11.GL_QUADS);
-				// UtilsGL.drawTexture (tooltipX, tooltipY - 4, tooltipX + tooltipWidth + 8, tooltipY + tooltipHeight + 4, UIPanel.tileTooltipBackground.getTileSetTexX0 (), UIPanel.tileTooltipBackground.getTileSetTexY0 (), UIPanel.tileTooltipBackground.getTileSetTexX1 (), UIPanel.tileTooltipBackground.getTileSetTexY1 ());
-				// UtilsGL.glEnd ();
-				//
-				// // Textos
-				// GL11.glBindTexture (GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
-				// UtilsGL.glBegin (GL11.GL_QUADS);
-				// int iCurrentHeight = tooltipY;
-				// UtilsGL.drawString (tooltip, tooltipX, iCurrentHeight);
-				// iCurrentHeight += UtilFont.MAX_HEIGHT + 2;
-				//
-				// for (int i = 0; i < alGods.size (); i++) {
-				// gd = alGods.get (i);
-				//
-				// if (Game.DEBUG_MODE) {
-				//							UtilsGL.drawString (gd.getFullName () + " (" + gd.getStatus () + ")", tooltipX, iCurrentHeight); //$NON-NLS-1$ //$NON-NLS-2$
-				// } else {
-				// UtilsGL.drawString (gd.getFullName (), tooltipX, iCurrentHeight);
-				// }
-				// iCurrentHeight += UtilFont.MAX_HEIGHT + 2;
-				// }
-				//
-				// UtilsGL.glEnd ();
-				// }
+				TooltipUIPanel.renderEventsTooltip (iconEventsPoint.x + GlobalEventData.getIcon ().getTileWidth () / 2, iconEventsPoint.y + GlobalEventData.getIcon ().getTileHeight (), renderWidth, renderHeight);
 			}
 		}
 	}
@@ -4686,8 +4520,10 @@ public final class UIPanel {
 		}
 	}
 
-	private void createMenuPanel (SmartMenu menu) {
-		RightMenuUIPanel.MENU_PANEL_HEIGHT = renderHeight - (minimapPanelY + MINIMAP_PANEL_HEIGHT + 2 * PIXELS_TO_BORDER) - BottomMenuUIPanel.BOTTOM_PANEL_HEIGHT - 2 * PIXELS_TO_BORDER;
+	public static void createMenuPanel (SmartMenu menu) {
+		int rWidth = UtilsGL.getWidth ();
+		int rHeight = UtilsGL.getHeight ();
+		RightMenuUIPanel.MENU_PANEL_HEIGHT = rHeight - (minimapPanelY + MINIMAP_PANEL_HEIGHT + 2 * PIXELS_TO_BORDER) - BottomMenuUIPanel.BOTTOM_PANEL_HEIGHT - 2 * PIXELS_TO_BORDER;
 		RightMenuUIPanel.MENU_PANEL_NUM_ITEMS_Y = (RightMenuUIPanel.MENU_PANEL_HEIGHT - PIXELS_TO_BORDER) / (RightMenuUIPanel.MENU_ITEM_HEIGHT + PIXELS_TO_BORDER);
 		if (RightMenuUIPanel.MENU_PANEL_NUM_ITEMS_Y < 1) {
 			RightMenuUIPanel.MENU_PANEL_NUM_ITEMS_Y = 1;
@@ -4706,7 +4542,7 @@ public final class UIPanel {
 			RightMenuUIPanel.MENU_PANEL_NUM_ITEMS_Y--;
 		}
 
-		RightMenuUIPanel.menuPanelPoint.setLocation (renderWidth - RightMenuUIPanel.MENU_PANEL_WIDTH - RightMenuUIPanel.tileOpenRightMenu.getTileWidth (), minimapPanelY + MINIMAP_PANEL_HEIGHT + 2 * PIXELS_TO_BORDER);
+		RightMenuUIPanel.menuPanelPoint.setLocation (rWidth - RightMenuUIPanel.MENU_PANEL_WIDTH - RightMenuUIPanel.tileOpenRightMenu.getTileWidth (), minimapPanelY + MINIMAP_PANEL_HEIGHT + 2 * PIXELS_TO_BORDER);
 
 		// Positions
 		RightMenuUIPanel.menuPanelItemsPosition = new ArrayList<Point> ();
@@ -4717,7 +4553,7 @@ public final class UIPanel {
 		}
 
 		// Minibotón para abrir/cerrar el menú
-		RightMenuUIPanel.tileOpenCloseRightMenuPoint.setLocation (renderWidth - RightMenuUIPanel.tileOpenRightMenu.getTileWidth (), renderHeight / 2 - RightMenuUIPanel.tileOpenRightMenu.getTileHeight () / 2);
+		RightMenuUIPanel.tileOpenCloseRightMenuPoint.setLocation (rWidth - RightMenuUIPanel.tileOpenRightMenu.getTileWidth (), rHeight / 2 - RightMenuUIPanel.tileOpenRightMenu.getTileHeight () / 2);
 	}
 
 	public static void closeTypingPanel () {

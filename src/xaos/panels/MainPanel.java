@@ -48,7 +48,6 @@ import xaos.tiles.terrain.TerrainManagerItem;
 import xaos.tiles.terrain.special.Lava;
 import xaos.tiles.terrain.special.Water;
 import xaos.utils.ColorGL;
-import xaos.utils.LightSource;
 import xaos.utils.LightingManager;
 import xaos.utils.Log;
 import xaos.utils.Messages;
@@ -222,6 +221,8 @@ public final class MainPanel {
 
 		LightingManager.updateLightSources(zView, cellXMin, cellXMax, cellYMin, cellYMax);
 
+		xaos.graphics.shaders.ShaderManager.bindWorldShader (renderWidth, renderHeight, iBaseXGeneral, iBaseYGeneral, zView);
+
 		if (bMouseInMainArea) {
 			int iTextureID = renderAllTerrains (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, pointTileMouse, 0, -1);
 			iTextureID = renderAllEntities (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, pointTileMouse, 0, iTextureID);
@@ -232,6 +233,8 @@ public final class MainPanel {
 			iTextureID = renderAllEntities (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, null, 0, iTextureID);
 			renderTask (zView, iBaseXGeneral, iBaseYGeneral + Tile.TERRAIN_ICON_HEIGHT, null, iTextureID, cellXMin, cellYMin);
 		}
+
+		xaos.graphics.shaders.ShaderManager.unbind ();
 		GL11.glDisable (GL11.GL_DEPTH_TEST);
 
 		xaos.graphics.ParticleSystem.update();
@@ -1262,10 +1265,12 @@ public final class MainPanel {
 						}
 						GL11.glEnable (GL11.GL_BLEND);
 						GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+						xaos.graphics.shaders.ShaderManager.setWaterEffect (true);
 						currentTextureID = setColorShadowLightCell (cell, tile, zLevelOffset, currentTextureID, true);
 						float fAlpha = (cell.getTerrain().getFluidCount() >= 5) ? 0.76f : 0.60f;
 						GL11.glColor4f (0.18f, 0.52f, 0.88f, fAlpha);
 						UtilsGL.drawTextureZ (iXGeneral, iYSpecific, iXGeneral + tile.getTileWidth (), iYSpecific + tile.getTileHeight (), tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 (), iDepth);
+						xaos.graphics.shaders.ShaderManager.setWaterEffect (false);
 						GL11.glDisable (GL11.GL_BLEND);
 					} else { // if (cell.getTerrain ().getFluidType () == Terrain.FLUIDS_LAVA) {
 						if (item != null && ItemManager.getItem (item.getIniHeader ()).isAllowFluids ()) {

@@ -1,13 +1,10 @@
 package xaos.panels;
 
-import java.awt.Color;
-import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.lwjgl.opengl.GL11;
 
-import xaos.compat.input.Mouse;
 import xaos.main.Game;
 import xaos.tiles.Tile;
 import xaos.utils.ColorGL;
@@ -110,6 +107,9 @@ public class RadialMenuPanel {
 
     public static void render() {
         if (!active) return;
+        if (Game.getCurrentState() == Game.STATE_SHOWING_CONTEXT_MENU && Game.getCurrentContextMenu() != null) {
+            return;
+        }
 
         int mouseX = xaos.compat.input.Mouse.getX ();
         int mouseY = xaos.compat.opengl.Display.getHeight () - xaos.compat.input.Mouse.getY () - 1;
