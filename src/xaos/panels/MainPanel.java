@@ -48,6 +48,8 @@ import xaos.tiles.terrain.TerrainManagerItem;
 import xaos.tiles.terrain.special.Lava;
 import xaos.tiles.terrain.special.Water;
 import xaos.utils.ColorGL;
+import xaos.utils.LightSource;
+import xaos.utils.LightingManager;
 import xaos.utils.Log;
 import xaos.utils.Messages;
 import xaos.utils.Point3D;
@@ -96,6 +98,7 @@ public final class MainPanel {
 	// public static int depthYMin = 0;
 
 	public static int itemBuildFace = Item.FACE_WEST;
+	public static Point3D pointTileMouse;
 
 	// Blinks
 	private static boolean bCheckBlinkPiles = false;
@@ -201,7 +204,7 @@ public final class MainPanel {
 		int iBaseXGeneral = (-xView) * (Tile.TERRAIN_ICON_WIDTH / 2) + ((-yView) * Tile.TERRAIN_ICON_WIDTH / 2) + xCentro;
 		int iBaseYGeneral = (-yView) * (Tile.TERRAIN_ICON_HEIGHT / 2) - ((-xView) * Tile.TERRAIN_ICON_HEIGHT / 2) + yCentro;
 		Point pointMouse = new Point (Mouse.getX (), renderHeight - Mouse.getY () - 1);
-		Point3D pointTileMouse = getTileMouse (pointMouse.x, pointMouse.y, xView, yView, zView);
+		pointTileMouse = getTileMouse (pointMouse.x, pointMouse.y, xView, yView, zView);
 		boolean bMouseInMainArea = Game.getPanelUI ().isMouseOnAPanel (pointMouse.x, pointMouse.y) == UIPanel.MOUSE_NONE;
 
 		GL11.glEnable (GL11.GL_DEPTH_TEST);
@@ -217,6 +220,8 @@ public final class MainPanel {
 			bCheckBlinkCells = false;
 		}
 
+		LightingManager.updateLightSources(zView, cellXMin, cellXMax, cellYMin, cellYMax);
+
 		if (bMouseInMainArea) {
 			int iTextureID = renderAllTerrains (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, pointTileMouse, 0, -1);
 			iTextureID = renderAllEntities (zView, cellXMin, cellXMax, cellYMin, cellYMax, iBaseXGeneral, iBaseYGeneral, pointTileMouse, 0, iTextureID);
@@ -229,10 +234,15 @@ public final class MainPanel {
 		}
 		GL11.glDisable (GL11.GL_DEPTH_TEST);
 
+		xaos.graphics.ParticleSystem.update();
+		xaos.graphics.ParticleSystem.render(iBaseXGeneral, iBaseYGeneral, zView);
+
 		// Animation de los special tiles
 		World.updateSpecialTilesAnimation ();
 
 		Game.getPanelUI ().render ();
+		xaos.panels.RadialMenuPanel.render();
+		xaos.panels.CitizenInspectorPanel.render();
 
 		// Información tooltip sólo si no hay un menú contextual abierto
 		if (bMouseInMainArea && pointTileMouse != null && (UIPanel.typingPanel == null)) {
@@ -609,10 +619,11 @@ public final class MainPanel {
 			iCurrentTextureID = UtilsGL.setTexture (tile, iCurrentTextureID);
 
 			GlobalEventData ged = Game.getWorld ().getGlobalEvents ();
+			float[] radial = LightingManager.calculateRadialLight(cell.getCoordinates().x, cell.getCoordinates().y, cell.getCoordinates().z, fShadowLightColor);
 			if (bTransparency) {
-				GL11.glColor4f (fShadowLightColor + ged.getRed (), fShadowLightColor + ged.getGreen (), fShadowLightColor + ged.getBlue (), TRANSPARENCY);
+				GL11.glColor4f (radial[0] + ged.getRed (), radial[1] + ged.getGreen (), radial[2] + ged.getBlue (), TRANSPARENCY);
 			} else {
-				GL11.glColor3f (fShadowLightColor + ged.getRed (), fShadowLightColor + ged.getGreen (), fShadowLightColor + ged.getBlue ());
+				GL11.glColor3f (radial[0] + ged.getRed (), radial[1] + ged.getGreen (), radial[2] + ged.getBlue ());
 			}
 			return iCurrentTextureID;
 		}
@@ -691,10 +702,11 @@ public final class MainPanel {
 				}
 
 				GlobalEventData ged = Game.getWorld ().getGlobalEvents ();
+				float[] radial = LightingManager.calculateRadialLight(cell.getCoordinates().x, cell.getCoordinates().y, cell.getCoordinates().z, fShadowLightColor);
 				if (bTransparency) {
-					GL11.glColor4f (fShadowLightColor + ged.getRed (), fShadowLightColor + ged.getGreen (), fShadowLightColor + ged.getBlue (), TRANSPARENCY);
+					GL11.glColor4f (radial[0] + ged.getRed (), radial[1] + ged.getGreen (), radial[2] + ged.getBlue (), TRANSPARENCY);
 				} else {
-					GL11.glColor3f (fShadowLightColor + ged.getRed (), fShadowLightColor + ged.getGreen (), fShadowLightColor + ged.getBlue ());
+					GL11.glColor3f (radial[0] + ged.getRed (), radial[1] + ged.getGreen (), radial[2] + ged.getBlue ());
 				}
 			}
 			return iCurrentTextureID;
@@ -985,8 +997,11 @@ public final class MainPanel {
 				ItemManagerItem imi = null;
 				boolean bBuildingOK = false;
 				if (bBuilding) {
-					bmi = BuildingManager.getItem (Game.getCurrentTask ().getParameter ());
-					bBuildingOK = true;
+					String param = Game.getCurrentTask ().getParameter ();
+					if (param != null) {
+						bmi = BuildingManager.getItem (param);
+					}
+					bBuildingOK = (bmi != null && bmi.getGroundData () != null);
 				} else if (bIteming) {
 					if (queuing) {
 						// En caso de colas el item está en el parámetro 2
@@ -1005,8 +1020,7 @@ public final class MainPanel {
 					}
 				}
 				boolean bZoneOK = false;
-				if (zoning) {
-					// bZoneOK = Zone.areCellsAvailableForZone (zmi, x1, y1, x2, y2, zView, expandZone);
+				if (zoning && zmi != null) {
 					bZoneOK = Zone.areCellsAvailableForZone (zmi, x1, y1, x2, y2, z3D, expandZone);
 				}
 
@@ -1031,16 +1045,21 @@ public final class MainPanel {
 							Tile terrainSpecialTile = null;
 							boolean bUseMouseBad = false;
 							if (bBuilding) {
-								if (bBuildingOK) {
+								if (bBuildingOK && bmi != null && bmi.getGroundData () != null) {
 									// Miramos si la casilla forma parte del edificio para dibujarla o no
 									// Ya que ahora los edificios no tienen porque ser rectangulares
-									char groundDataChar = bmi.getGroundData ().charAt ((j - y1) * bmi.getWidth () + (i - x1));
-									if (groundDataChar == Building.GROUND_NON_BUILDING) {
-										bDraw = false;
-									} else {
-										if (!Building.isCellAvailableForBuilding (bmi, i, j, z3D)) {
-											bUseMouseBad = true;
+									int charIdx = (j - y1) * bmi.getWidth () + (i - x1);
+									if (charIdx >= 0 && charIdx < bmi.getGroundData ().length ()) {
+										char groundDataChar = bmi.getGroundData ().charAt (charIdx);
+										if (groundDataChar == Building.GROUND_NON_BUILDING) {
+											bDraw = false;
+										} else {
+											if (!Building.isCellAvailableForBuilding (bmi, i, j, z3D)) {
+												bUseMouseBad = true;
+											}
 										}
+									} else {
+										bUseMouseBad = true;
 									}
 								} else {
 									bUseMouseBad = true;
@@ -1388,6 +1407,8 @@ public final class MainPanel {
 					iDepth = Math.max (Cell.getDepth (cell.getCoordinates ().x, cell.getCoordinates ().y, cell.getCoordinates ().z), Cell.getDepth (p3d.x, p3d.y, p3d.z));
 				}
 			}
+
+			le.getKeyframeAnimation().update();
 
 			// Si la celda tiene un item grande, miraremos que el iDepth no tenga que ser mayor
 			Item item = (le.getPath ().size () == 0) ? cell.getItem () : World.getCell (le.getPath ().get (0)).getItem ();
@@ -1945,10 +1966,6 @@ public final class MainPanel {
 		ArrayList<String> alMessages = new ArrayList<String> ();
 		ArrayList<ColorGL> alColor = new ArrayList<ColorGL> ();
 
-		// Elevation Z-Level indicator header
-		alMessages.add ("📐 Floor Elevation: Level " + pointTileMouse.z);
-		alColor.add (ColorGL.YELLOW);
-
 		// Terrain / Zones
 		String sMessage = null;
 		ColorGL color;
@@ -2264,11 +2281,9 @@ public final class MainPanel {
 				iY = iY - ((iY + iHeight) - (renderHeight));
 			}
 
-			GL11.glColor4f (1, 1, 1, 1);
-			GL11.glBindTexture (GL11.GL_TEXTURE_2D, UIPanel.tileTooltipBackground.getTextureID ());
-			UtilsGL.glBegin (GL11.GL_QUADS);
-			UtilsGL.drawTexture (iX, iY, iX + iWidth, iY + iHeight, UIPanel.tileTooltipBackground.getTileSetTexX0 (), UIPanel.tileTooltipBackground.getTileSetTexY0 (), UIPanel.tileTooltipBackground.getTileSetTexX1 (), UIPanel.tileTooltipBackground.getTileSetTexY1 ());
-			UtilsGL.glEnd ();
+			UtilsGL.drawMedievalBox (iX - 4, iY - 4, iX + iWidth + 4, iY + iHeight + 4);
+			GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+			GL11.glEnable (GL11.GL_TEXTURE_2D);
 			GL11.glBindTexture (GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
 			UtilsGL.glBegin (GL11.GL_QUADS);
 

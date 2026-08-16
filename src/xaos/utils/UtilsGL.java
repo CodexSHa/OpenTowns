@@ -331,8 +331,10 @@ public final class UtilsGL {
 		if (ATI_begin) {
 			if (!ATI_drawed) {
 				Tile tile = World.getTileRedCross ();
-				drawTexture (0, 0, tile.getTileWidth (), tile.getTileHeight (), tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 (), ColorGL.WHITE, 0);
-				GL11.glColor4f (1, 1, 1, 1);
+				if (tile != null) {
+					drawTexture (0, 0, tile.getTileWidth (), tile.getTileHeight (), tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 (), ColorGL.WHITE, 0);
+					GL11.glColor4f (1, 1, 1, 1);
+				}
 			}
 
 			ATI_begin = false;
@@ -1328,6 +1330,47 @@ public final class UtilsGL {
 		return iTexture;
 	}
 
+	public static void drawMedievalBox(float x1, float y1, float x2, float y2) {
+		GL11.glDisable(GL11.GL_TEXTURE_2D);
+		GL11.glEnable(GL11.GL_BLEND);
+		GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+		// Dark Walnut Background (GL: 0.11f, 0.08f, 0.05f, 0.94f)
+		GL11.glColor4f(0.11f, 0.08f, 0.05f, 0.94f);
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glVertex2f(x1, y1);
+		GL11.glVertex2f(x2, y1);
+		GL11.glVertex2f(x2, y2);
+		GL11.glVertex2f(x1, y2);
+		GL11.glEnd();
+
+		// Inner Parchment Fill (GL: 0.18f, 0.13f, 0.09f, 0.88f)
+		GL11.glColor4f(0.18f, 0.13f, 0.09f, 0.88f);
+		GL11.glBegin(GL11.GL_QUADS);
+		GL11.glVertex2f(x1 + 2, y1 + 2);
+		GL11.glVertex2f(x2 - 2, y1 + 2);
+		GL11.glVertex2f(x2 - 2, y2 - 2);
+		GL11.glVertex2f(x1 + 2, y2 - 2);
+		GL11.glEnd();
+
+		// Outer Brass/Bronze 1px Border (GL: 0.70f, 0.55f, 0.27f, 0.90f)
+		GL11.glLineWidth(1.0f);
+		GL11.glColor4f(0.70f, 0.55f, 0.27f, 0.90f);
+		GL11.glBegin(GL11.GL_LINE_LOOP);
+		GL11.glVertex2f(x1, y1);
+		GL11.glVertex2f(x2, y1);
+		GL11.glVertex2f(x2, y2);
+		GL11.glVertex2f(x1, y2);
+		GL11.glEnd();
+
+		GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+		GL11.glEnable(GL11.GL_TEXTURE_2D);
+		GL11.glDisable(GL11.GL_BLEND);
+	}
+
+	public static void drawGlassmorphicBox(float x1, float y1, float x2, float y2) {
+		drawMedievalBox(x1, y1, x2, y2);
+	}
 
 	public static void destroy () {
 		Display.destroy ();

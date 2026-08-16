@@ -2664,33 +2664,37 @@ public final class TaskManager implements Externalizable {
             } else if (task.getTask() == Task.TASK_AUTOEQUIP) {
                 Game.iError = Task.TASK_AUTOEQUIP;
                 // Tarea virtual de autoequip, buscamos al aldeano, nos da igual si está ocupado o no
+                if (task.getParameter() != null && task.getParameter().trim().length() > 0) {
+                    try {
+                        int iCitID = Integer.parseInt(task.getParameter());
+                        Citizen citizen = (Citizen) World.getLivingEntityByID(iCitID);
+                        if (citizen != null) {
+                            // Aldeano en la zona
+                            if (citizen.isIdle()) {
+                                // Ocioso, le metemos la tarea y lo sacamos de la lista de ociosos
+                                citizen.setCurrentTask(task);
 
-                int iCitID = Integer.parseInt(task.getParameter());
-
-                Citizen citizen = (Citizen) World.getLivingEntityByID(iCitID);
-                if (citizen != null) {
-                    // Aldeano en la zona
-                    if (citizen.isIdle()) {
-                        // Ocioso, le metemos la tarea y lo sacamos de la lista de ociosos
-                        citizen.setCurrentTask(task);
-
-                        ArrayList<Citizen> alCits = hmCitizensSinTarea.get(World.getCell(citizen.getCoordinates()).getAstarZoneID());
-                        if (alCits != null) {
-                            for (int o = 0; o < alCits.size(); o++) {
-                                if (alCits.get(o).getID() == citizen.getID()) {
-                                    // Lo tenemos
-                                    alCits.remove(o);
-                                    break;
+                                ArrayList<Citizen> alCits = hmCitizensSinTarea.get(World.getCell(citizen.getCoordinates()).getAstarZoneID());
+                                if (alCits != null) {
+                                    for (int o = 0; o < alCits.size(); o++) {
+                                        if (alCits.get(o).getID() == citizen.getID()) {
+                                            // Lo tenemos
+                                            alCits.remove(o);
+                                            break;
+                                        }
+                                    }
+                                    hmCitizensSinTarea.put(World.getCell(citizen.getCoordinates()).getAstarZoneID(), alCits);
+                                }
+                            } else {
+                                // No ocioso, si no está comiendo ni durmiendo ni curándose ni equipándose lo sacamos de su tarea y le metemos la nueva
+                                if (citizen.getCurrentTask() == null || (citizen.getCurrentTask().getTask() != Task.TASK_EAT && citizen.getCurrentTask().getTask() != Task.TASK_SLEEP && citizen.getCurrentTask().getTask() != Task.TASK_WEAR && citizen.getCurrentTask().getTask() != Task.TASK_WEAR_OFF && citizen.getCurrentTask().getTask() != Task.TASK_AUTOEQUIP && citizen.getCurrentTask().getTask() != Task.TASK_DROP && citizen.getCurrentTask().getTask() != Task.TASK_HEAL)) {
+                                    removeCitizen(citizen);
+                                    citizen.setCurrentTask(task);
                                 }
                             }
-                            hmCitizensSinTarea.put(World.getCell(citizen.getCoordinates()).getAstarZoneID(), alCits);
                         }
-                    } else {
-                        // No ocioso, si no está comiendo ni durmiendo ni curándose ni equipándose lo sacamos de su tarea y le metemos la nueva
-                        if (citizen.getCurrentTask() == null || (citizen.getCurrentTask().getTask() != Task.TASK_EAT && citizen.getCurrentTask().getTask() != Task.TASK_SLEEP && citizen.getCurrentTask().getTask() != Task.TASK_WEAR && citizen.getCurrentTask().getTask() != Task.TASK_WEAR_OFF && citizen.getCurrentTask().getTask() != Task.TASK_AUTOEQUIP && citizen.getCurrentTask().getTask() != Task.TASK_DROP && citizen.getCurrentTask().getTask() != Task.TASK_HEAL)) {
-                            removeCitizen(citizen);
-                            citizen.setCurrentTask(task);
-                        }
+                    } catch (NumberFormatException e) {
+                        // ignore malformed id
                     }
                 }
             }

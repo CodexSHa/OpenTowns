@@ -91,6 +91,7 @@ public class Terrain implements Externalizable {
 
             if (getMineTurns() % 5 == 0) {
                 UtilsAL.play(UtilsAL.SOURCE_FX_MINE, z);
+                xaos.graphics.ParticleSystem.spawnStoneChips(x, y, z);
             }
 
             if (getMineTurns() <= 0) {

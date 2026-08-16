@@ -73,28 +73,40 @@ public final class RightMenuUIPanel {
 							break bucle1;
 						}
 						point = menuPanelItemsPosition.get (iMenu);
+						boolean hovered = (iItemMenu == iMenu);
 
-						// Round button
-						if (menuPanelMenu.getItems ().get (iMenu).getType () == SmartMenu.TYPE_MENU) {
-							iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItemSM, iCurrentTexture);
-							if (checkBlinkRight && TutorialFlow.currentBlinkRight (menuPanelMenu.getItems ().get (iMenu).getID ())) {
-								UtilsGL.setColorRed ();
-								UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemMenu == iMenu));
-								UtilsGL.unsetColor ();
-							} else {
-								UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemMenu == iMenu));
-							}
+						GL11.glDisable (GL11.GL_TEXTURE_2D);
+						GL11.glEnable (GL11.GL_BLEND);
+						GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+						if (hovered) {
+							GL11.glColor4f (0.28f, 0.20f, 0.14f, 0.98f);
 						} else {
-							iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItem, iCurrentTexture);
-
-							if (checkBlinkRight && TutorialFlow.currentBlinkRight (menuPanelMenu.getItems ().get (iMenu).getID ())) {
-								UtilsGL.setColorRed ();
-								UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemMenu == iMenu));
-								UtilsGL.unsetColor ();
-							} else {
-								UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemMenu == iMenu));
-							}
+							GL11.glColor4f (0.14f, 0.10f, 0.07f, 0.92f);
 						}
+						GL11.glBegin (GL11.GL_QUADS);
+						GL11.glVertex2f (point.x + 2, point.y + 2);
+						GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + 2);
+						GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+						GL11.glVertex2f (point.x + 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+						GL11.glEnd ();
+
+						// 1px Brass/Gold Outline
+						GL11.glLineWidth (1.0f);
+						if (hovered) {
+							GL11.glColor4f (0.96f, 0.78f, 0.35f, 1.00f);
+						} else {
+							GL11.glColor4f (0.70f, 0.55f, 0.27f, 0.85f);
+						}
+						GL11.glBegin (GL11.GL_LINE_LOOP);
+						GL11.glVertex2f (point.x + 2, point.y + 2);
+						GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + 2);
+						GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+						GL11.glVertex2f (point.x + 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+						GL11.glEnd ();
+
+						GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+						GL11.glEnable (GL11.GL_TEXTURE_2D);
 
 						// Icono
 						Tile tile = menuPanelMenu.getItems ().get (iMenu).getIcon ();

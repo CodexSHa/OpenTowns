@@ -1,6 +1,7 @@
 package xaos.panels;
 
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 import org.lwjgl.opengl.GL11;
 
@@ -9,6 +10,7 @@ import xaos.main.World;
 import xaos.tiles.Cell;
 import xaos.tiles.Tile;
 import xaos.tiles.entities.Entity;
+import xaos.tiles.entities.living.LivingEntity;
 import xaos.tiles.terrain.Terrain;
 import xaos.tiles.terrain.TerrainManager;
 import xaos.utils.ColorGL;
@@ -16,13 +18,12 @@ import xaos.utils.ImageData;
 import xaos.utils.Point3D;
 import xaos.utils.Point3DShort;
 import xaos.utils.TextureData;
+import xaos.utils.UtilFont;
 import xaos.utils.UtilsGL;
 
 public final class MiniMapPanel {
 
-//    public static int TEXTURE_MINIMAPS_INDEX = 32;
     private static TextureData[] minimapTextures;
-
     private static final Tile YELLOW_TILE = new Tile("ui_yellow"); //$NON-NLS-1$
 
     public static int renderX;
@@ -49,12 +50,11 @@ public final class MiniMapPanel {
         texturesReload = null;
     }
 
-    public static void render () {
+    public static void render() {
         if (texturesReload == null) {
             loadTextures();
         }
 
-        // Paint minimap
         Point3D pointView = Game.getWorld().getView();
 
         if (texturesReload[pointView.z] && textureRefreshRate == 0) {
@@ -64,65 +64,80 @@ public final class MiniMapPanel {
 
         textureRefreshRate--;
         if (textureRefreshRate < 0) {
-            textureRefreshRate = Game.FPS_INGAME; // Cada segundo refresh
+            textureRefreshRate = Game.FPS_INGAME;
         }
 
-        // Pintamos la textura
+        // 1. Medieval backing frame
+        UtilsGL.drawMedievalBox(renderX - 6, renderY - 6, renderX + renderWidth + 6, renderY + renderHeight + 6);
+
+        // 2. Diamond terrain map texture
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glEnable(GL11.GL_BLEND);
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GL11.glBindTexture(GL11.GL_TEXTURE_2D, minimapTextures[pointView.z].getTextureID());
         GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
         UtilsGL.glBegin(GL11.GL_QUADS);
-        UtilsGL.drawTexture(renderX, renderY + renderHeight / 2, renderX + renderWidth / 2, renderY + renderHeight, renderX + renderWidth, renderY + renderHeight / 2, renderX + renderWidth / 2, renderY, 0, 0, 1, 1);
+        UtilsGL.drawTexture(renderX, renderY + renderHeight / 2,
+                renderX + renderWidth / 2, renderY + renderHeight,
+                renderX + renderWidth,    renderY + renderHeight / 2,
+                renderX + renderWidth / 2, renderY,
+                0, 0, 1, 1);
         UtilsGL.glEnd();
 
-        // Calculamos el tamaño del cuadrado amarillo teniendo en cuenta el tamaño del mainpanel y del minimapa
+        // 3. Viewport tracking outline (gold box)
         int iSquareX = (pointView.x + pointView.y - (World.MAP_WIDTH - World.MAP_HEIGHT) / 2) / 2;
         int iSquareY = (pointView.y - pointView.x + (World.MAP_WIDTH + World.MAP_HEIGHT) / 2) / 2;
-        int iSquareWidth = ((MainPanel.renderWidth / Tile.TERRAIN_ICON_WIDTH) * renderWidth) / World.MAP_WIDTH;
+        int iSquareWidth  = ((MainPanel.renderWidth  / Tile.TERRAIN_ICON_WIDTH)  * renderWidth)  / World.MAP_WIDTH;
         int iSquareHeight = ((MainPanel.renderHeight / Tile.TERRAIN_ICON_HEIGHT) * renderHeight) / World.MAP_HEIGHT;
+        iSquareX = (iSquareX * renderWidth)  / World.MAP_WIDTH  + renderX - iSquareWidth  / 2;
+        iSquareY = (iSquareY * renderHeight) / World.MAP_HEIGHT + renderY - iSquareHeight / 2;
 
-        // Lo pasamos al tamaño que toca
-        iSquareX = (iSquareX * renderWidth) / World.MAP_WIDTH;
-        iSquareY = (iSquareY * renderHeight) / World.MAP_HEIGHT;
+        GL11.glDisable(GL11.GL_TEXTURE_2D);
+        GL11.glColor4f(0.96f, 0.78f, 0.35f, 0.95f);
+        GL11.glLineWidth(1.5f);
+        GL11.glBegin(GL11.GL_LINE_LOOP);
+        GL11.glVertex2f(iSquareX, iSquareY);
+        GL11.glVertex2f(iSquareX + iSquareWidth, iSquareY);
+        GL11.glVertex2f(iSquareX + iSquareWidth, iSquareY + iSquareHeight);
+        GL11.glVertex2f(iSquareX, iSquareY + iSquareHeight);
+        GL11.glEnd();
+        GL11.glLineWidth(1.0f);
 
-        // Lo posicionamos en la pantalla (restamos también la mitad del cuadradito amarillo para que quede centrado)
-        iSquareX += (renderX - iSquareWidth / 2);
-        iSquareY += (renderY - iSquareHeight / 2);
-
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, YELLOW_TILE.getTextureID());
-        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
-        UtilsGL.glBegin(GL11.GL_QUADS);
-        // Pintamos el cuadrado amarillo
-        UtilsGL.drawTexture(iSquareX, iSquareY, iSquareX + iSquareWidth, iSquareY + 1, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
-        UtilsGL.drawTexture(iSquareX, iSquareY + iSquareHeight, iSquareX + iSquareWidth, iSquareY + iSquareHeight + 1, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
-        UtilsGL.drawTexture(iSquareX, iSquareY, iSquareX + 1, iSquareY + iSquareHeight, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
-        UtilsGL.drawTexture(iSquareX + iSquareWidth, iSquareY, iSquareX + iSquareWidth + 1, iSquareY + iSquareHeight, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
-        // Render human indicators on minimap overlay
-        GL11.glBindTexture(GL11.GL_TEXTURE_2D, YELLOW_TILE.getTextureID());
-        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_REPLACE);
-        UtilsGL.glBegin(GL11.GL_QUADS);
-        
-        java.util.ArrayList<Integer> citizens = World.getCitizenIDs();
+        // 4. Citizen dots (bright green indicators)
+        GL11.glColor4f(0.20f, 0.95f, 0.40f, 1.0f);
+        GL11.glBegin(GL11.GL_QUADS);
+        ArrayList<Integer> citizens = World.getCitizenIDs();
         if (citizens != null) {
             for (int i = 0; i < citizens.size(); i++) {
-                xaos.tiles.entities.living.LivingEntity living = World.getLivingEntityByID(citizens.get(i));
+                LivingEntity living = World.getLivingEntityByID(citizens.get(i));
                 if (living != null && living.getZ() == pointView.z) {
                     int posX = (living.getX() + living.getY() - (World.MAP_WIDTH - World.MAP_HEIGHT) / 2) / 2;
                     int posY = (living.getY() - living.getX() + (World.MAP_WIDTH + World.MAP_HEIGHT) / 2) / 2;
-                    posX = (posX * renderWidth) / World.MAP_WIDTH + renderX;
+                    posX = (posX * renderWidth)  / World.MAP_WIDTH  + renderX;
                     posY = (posY * renderHeight) / World.MAP_HEIGHT + renderY;
-
-                    UtilsGL.drawTexture(posX - 1, posY - 1, posX + 2, posY + 2, YELLOW_TILE.getTileSetTexX0(), YELLOW_TILE.getTileSetTexY0(), YELLOW_TILE.getTileSetTexX1(), YELLOW_TILE.getTileSetTexY1());
+                    GL11.glVertex2f(posX - 1, posY - 1);
+                    GL11.glVertex2f(posX + 2, posY - 1);
+                    GL11.glVertex2f(posX + 2, posY + 2);
+                    GL11.glVertex2f(posX - 1, posY + 2);
                 }
             }
         }
+        GL11.glEnd();
+
+        // 5. Header title above minimap
+        GL11.glEnable(GL11.GL_TEXTURE_2D);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
+        GL11.glTexEnvf(GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
+        UtilsGL.glBegin(GL11.GL_QUADS);
+        UtilsGL.drawStringWithBorder("Realm Map", renderX + 4, renderY - 14,
+                new ColorGL(0.96f, 0.78f, 0.35f), ColorGL.BLACK);
         UtilsGL.glEnd();
+
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GL11.glDisable(GL11.GL_BLEND);
     }
 
-    /**
-     * Carga las texturas de cada nivel y va poniendo los IDs en el array de ID
-     * de texturas
-     *
-     */
     private static void loadTextures() {
         texturesReload = new boolean[World.MAP_DEPTH];
         for (int i = 0; i < World.MAP_DEPTH; i++) {
@@ -131,11 +146,6 @@ public final class MiniMapPanel {
         }
     }
 
-    /**
-     * Reload a texture
-     *
-     * @param level
-     */
     private static void reloadTexture(int level) {
         Cell cell;
         Entity entity;
@@ -190,17 +200,7 @@ public final class MiniMapPanel {
         }
     }
 
-    /**
-     * Retorna el color a pintar de una celda según el terreno y/o lo que haya
-     * en ella
-     *
-     * @param x
-     * @param y
-     * @param z
-     * @return
-     */
     private static ColorGL getCellColor(Cell cell) {
-        // Terrain
         if (cell.isDiscovered()) {
             if (cell.getTerrain().hasFluids()) {
                 if (cell.getTerrain().getFluidType() == Terrain.FLUIDS_WATER) {
@@ -210,7 +210,6 @@ public final class MiniMapPanel {
                 }
             } else {
                 if (cell.isMined()) {
-                    // DIGGED, buscamos la primera celda sin digar y le aplicamos un darkeness
                     Point3DShort p3d = cell.getCoordinates();
                     if (p3d.z < (World.MAP_DEPTH - 1)) {
                         Cell cellUnder;
@@ -245,14 +244,6 @@ public final class MiniMapPanel {
         }
     }
 
-    /**
-     * Indica si el mouse está encima del minimapa. Como se dibuja en forma de
-     * diamante hacemos el cálculo necesario
-     *
-     * @param x
-     * @param y
-     * @return
-     */
     public static boolean isMouseOver(int x, int y) {
         int x200 = (x * World.MAP_WIDTH) / renderWidth;
         int y200 = (y * World.MAP_HEIGHT) / renderHeight;
@@ -262,13 +253,6 @@ public final class MiniMapPanel {
         return (mapX >= 0 && mapX < World.MAP_WIDTH && mapY >= 0 && mapY < World.MAP_HEIGHT);
     }
 
-    /**
-     * Mouse pressed
-     *
-     * @param x
-     * @param y
-     * @param mouseButton
-     */
     public static void mousePressed(int x, int y, int mouseButton) {
         int x200 = (x * World.MAP_WIDTH) / renderWidth;
         int y200 = (y * World.MAP_HEIGHT) / renderHeight;
@@ -288,10 +272,6 @@ public final class MiniMapPanel {
         MiniMapPanel.renderHeight = renderHeight;
     }
 
-    /**
-     * Limpia todos los datos (se usa cuando se sale de la partida y se va al
-     * menú principal)
-     */
     public static void clear() {
         texturesReload = null;
     }

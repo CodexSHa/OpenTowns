@@ -403,10 +403,19 @@ public final class CommandPanel {
                 task.setParameter2(sParameter2);
                 Game.getWorld().getTaskManager().addTask(task);
             } else if (sCommand.equals(COMMAND_AUTOEQUIP)) {
-                Task task = new Task(Task.TASK_AUTOEQUIP);
-                task.setTile(tile, iconType);
-                task.setParameter(sParameter);
-                Game.getWorld().getTaskManager().addTask(task);
+                if (sParameter != null) {
+                    Task task = new Task(Task.TASK_AUTOEQUIP);
+                    task.setTile(tile, iconType);
+                    task.setParameter(sParameter);
+                    Game.getWorld().getTaskManager().addTask(task);
+                } else if (World.getCitizenIDs() != null) {
+                    for (int i = 0; i < World.getCitizenIDs().size(); i++) {
+                        Task task = new Task(Task.TASK_AUTOEQUIP);
+                        task.setTile(tile, iconType);
+                        task.setParameter(World.getCitizenIDs().get(i).toString());
+                        Game.getWorld().getTaskManager().addTask(task);
+                    }
+                }
             } else if (sCommand.equals(COMMAND_WEAR_OFF)) {
                 Task task = new Task(Task.TASK_WEAR_OFF);
                 task.setTile(tile, iconType);

@@ -2,6 +2,7 @@ package xaos.panels;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import org.lwjgl.opengl.GL11;
 import xaos.campaign.TutorialFlow;
 import xaos.panels.menus.SmartMenu;
 import xaos.tiles.Tile;
@@ -84,26 +85,16 @@ public final class BottomMenuUIPanel {
 
 	public static int renderBottomMenuPanel (int mouseX, int mouseY, int mousePanel, int iCurrentTexture) {
 		/*
-		 * BOTTOM PANEL
+		 * BOTTOM PANEL (Textured bar from ui.png)
 		 */
-		// Left scroll
-		if (mousePanel == UIPanel.MOUSE_BOTTOM_LEFT_SCROLL && bottomPanelItemIndex > 0) {
-			UtilsGL.drawTexture (bottomPanelLeftScrollX, bottomPanelY, bottomPanelLeftScrollX + BOTTOM_PANEL_SCROLL_WIDTH, bottomPanelY + BOTTOM_PANEL_HEIGHT, tileBottomScrollLeftON.getTileSetTexX0 (), tileBottomScrollLeftON.getTileSetTexY0 (), tileBottomScrollLeftON.getTileSetTexX1 (), tileBottomScrollLeftON.getTileSetTexY1 ());
-		} else {
-			UtilsGL.drawTexture (bottomPanelLeftScrollX, bottomPanelY, bottomPanelLeftScrollX + BOTTOM_PANEL_SCROLL_WIDTH, bottomPanelY + BOTTOM_PANEL_HEIGHT, tileBottomScrollLeft.getTileSetTexX0 (), tileBottomScrollLeft.getTileSetTexY0 (), tileBottomScrollLeft.getTileSetTexX1 (), tileBottomScrollLeft.getTileSetTexY1 ());
-		}
-
-		// Right scroll
-		iCurrentTexture = UtilsGL.setTexture (tileBottomScrollRight, iCurrentTexture);
-		if (mousePanel == UIPanel.MOUSE_BOTTOM_RIGHT_SCROLL && (bottomPanelItemIndex + BOTTOM_PANEL_NUM_ITEMS) < currentMenu.getItems ().size ()) {
-			UtilsGL.drawTexture (bottomPanelRightScrollX, bottomPanelY, bottomPanelRightScrollX + BOTTOM_PANEL_SCROLL_WIDTH, bottomPanelY + BOTTOM_PANEL_HEIGHT, tileBottomScrollRightON.getTileSetTexX0 (), tileBottomScrollRightON.getTileSetTexY0 (), tileBottomScrollRightON.getTileSetTexX1 (), tileBottomScrollRightON.getTileSetTexY1 ());
-		} else {
-			UtilsGL.drawTexture (bottomPanelRightScrollX, bottomPanelY, bottomPanelRightScrollX + BOTTOM_PANEL_SCROLL_WIDTH, bottomPanelY + BOTTOM_PANEL_HEIGHT, tileBottomScrollRight.getTileSetTexX0 (), tileBottomScrollRight.getTileSetTexY0 (), tileBottomScrollRight.getTileSetTexX1 (), tileBottomScrollRight.getTileSetTexY1 ());
-		}
-
-		// Panel itself
+		GL11.glEnable (GL11.GL_TEXTURE_2D);
+		GL11.glEnable (GL11.GL_BLEND);
+		GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+		GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
 		iCurrentTexture = UtilsGL.setTexture (tileBottomPanel, iCurrentTexture);
-		UtilsGL.drawTexture (bottomPanelX, bottomPanelY, bottomPanelX + BOTTOM_PANEL_WIDTH, bottomPanelY + BOTTOM_PANEL_HEIGHT, tileBottomPanel.getTileSetTexX0 (), tileBottomPanel.getTileSetTexY0 (), tileBottomPanel.getTileSetTexX1 (), tileBottomPanel.getTileSetTexY1 ());
+		UtilsGL.glBegin (GL11.GL_QUADS);
+		UtilsGL.drawTexture (bottomPanelLeftScrollX, bottomPanelY, bottomPanelRightScrollX + BOTTOM_PANEL_SCROLL_WIDTH, bottomPanelY + BOTTOM_PANEL_HEIGHT, tileBottomPanel.getTileSetTexX0 (), tileBottomPanel.getTileSetTexY0 (), tileBottomPanel.getTileSetTexX1 (), tileBottomPanel.getTileSetTexY1 ());
+		UtilsGL.glEnd ();
 
 		// BOTTOM PANEL Items
 		int iItemBottomPanel;
@@ -122,26 +113,17 @@ public final class BottomMenuUIPanel {
 
 			point = bottomPanelItemsPosition.get (i - bottomPanelItemIndex);
 
-			// Round button
-			if (currentMenu.getItems ().get (i).getType () == SmartMenu.TYPE_MENU) {
-				iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItemSM, iCurrentTexture);
-				if (checkBlinkBottom && TutorialFlow.currentBlinkBottom (currentMenu.getItems ().get (i).getID ())) {
-					UtilsGL.setColorRed ();
-					UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomPanel == (i - bottomPanelItemIndex)));
-					UtilsGL.unsetColor ();
-				} else {
-					UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomPanel == (i - bottomPanelItemIndex)));
-				}
-			} else {
-				iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItem, iCurrentTexture);
-				if (checkBlinkBottom && TutorialFlow.currentBlinkBottom (currentMenu.getItems ().get (i).getID ())) {
-					UtilsGL.setColorRed ();
-					UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomPanel == (i - bottomPanelItemIndex)));
-					UtilsGL.unsetColor ();
-				} else {
-					UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomPanel == (i - bottomPanelItemIndex)));
-				}
-			}
+			// Textured button frame from ui.png
+			boolean hovered = (iItemBottomPanel == (i - bottomPanelItemIndex));
+			GL11.glEnable (GL11.GL_TEXTURE_2D);
+			GL11.glColor4f (hovered ? 1.0f : 0.85f, hovered ? 1.0f : 0.85f, hovered ? 1.0f : 0.85f, 1.0f);
+			iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItem, iCurrentTexture);
+			UtilsGL.glBegin (GL11.GL_QUADS);
+			UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, hovered);
+			UtilsGL.glEnd ();
+
+			GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+			GL11.glEnable (GL11.GL_TEXTURE_2D);
 
 			// Icono
 			Tile tile = currentMenu.getItems ().get (i).getIcon ();
@@ -162,9 +144,7 @@ public final class BottomMenuUIPanel {
 		}
 		if (bottomSubPanelMenu != null) {
 			// Pintamos el panel
-			iCurrentTexture = UtilsGL.setTexture (tileBottomSubPanel[0], iCurrentTexture);
 			UIPanel.renderBackground (tileBottomSubPanel, bottomSubPanelPoint, BOTTOM_SUBPANEL_WIDTH, BOTTOM_SUBPANEL_HEIGHT);
-			// UtilsGL.drawTexture (bottomSubPanelX, bottomSubPanelY, bottomSubPanelX + BOTTOM_SUBPANEL_WIDTH, bottomSubPanelY + BOTTOM_SUBPANEL_HEIGHT, tileBottomSubPanel.getTileSetTexX0 (), tileBottomSubPanel.getTileSetTexY0 (), tileBottomSubPanel.getTileSetTexX1 (), tileBottomSubPanel.getTileSetTexY1 ());
 
 			// Pintamos los items
 			int iMenu;
@@ -176,26 +156,40 @@ public final class BottomMenuUIPanel {
 					}
 
 					point = bottomSubPanelItemsPosition.get (iMenu);
-					// Round button
-					if (bottomSubPanelMenu.getItems ().get (iMenu).getType () == SmartMenu.TYPE_MENU) {
-						iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItemSM, iCurrentTexture);
-						if (checkBlinkBottom && TutorialFlow.currentBlinkBottom (bottomSubPanelMenu.getItems ().get (iMenu).getID ())) {
-							UtilsGL.setColorRed ();
-							UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
-							UtilsGL.unsetColor ();
-						} else {
-							UIPanel.drawTile (UIPanel.tileBottomItemSM, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
-						}
+					boolean subHovered = (iItemBottomSubPanel == iMenu);
+
+					GL11.glDisable (GL11.GL_TEXTURE_2D);
+					GL11.glEnable (GL11.GL_BLEND);
+					GL11.glBlendFunc (GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+
+					if (subHovered) {
+						GL11.glColor4f (0.28f, 0.20f, 0.14f, 0.98f);
 					} else {
-						iCurrentTexture = UtilsGL.setTexture (UIPanel.tileBottomItem, iCurrentTexture);
-						if (checkBlinkBottom && TutorialFlow.currentBlinkBottom (bottomSubPanelMenu.getItems ().get (iMenu).getID ())) {
-							UtilsGL.setColorRed ();
-							UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
-							UtilsGL.unsetColor ();
-						} else {
-							UIPanel.drawTile (UIPanel.tileBottomItem, point, UIPanel.BOTTOM_ITEM_WIDTH, UIPanel.BOTTOM_ITEM_HEIGHT, (iItemBottomSubPanel == iMenu));
-						}
+						GL11.glColor4f (0.14f, 0.10f, 0.07f, 0.92f);
 					}
+					GL11.glBegin (GL11.GL_QUADS);
+					GL11.glVertex2f (point.x + 2, point.y + 2);
+					GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + 2);
+					GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+					GL11.glVertex2f (point.x + 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+					GL11.glEnd ();
+
+					// 1px Brass/Gold Outline
+					GL11.glLineWidth (1.0f);
+					if (subHovered) {
+						GL11.glColor4f (0.96f, 0.78f, 0.35f, 1.00f);
+					} else {
+						GL11.glColor4f (0.70f, 0.55f, 0.27f, 0.85f);
+					}
+					GL11.glBegin (GL11.GL_LINE_LOOP);
+					GL11.glVertex2f (point.x + 2, point.y + 2);
+					GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + 2);
+					GL11.glVertex2f (point.x + UIPanel.BOTTOM_ITEM_WIDTH - 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+					GL11.glVertex2f (point.x + 2, point.y + UIPanel.BOTTOM_ITEM_HEIGHT - 2);
+					GL11.glEnd ();
+
+					GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+					GL11.glEnable (GL11.GL_TEXTURE_2D);
 
 					// Icono
 					Tile tile = bottomSubPanelMenu.getItems ().get (iMenu).getIcon ();

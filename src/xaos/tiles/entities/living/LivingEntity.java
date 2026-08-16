@@ -144,6 +144,14 @@ public abstract class LivingEntity extends Entity {
 
 	private Point2D.Float positionOffset = new Point2D.Float (0, 0); // Se usa en el dibujado, para ir moviendo poco a poco a la living (en vez de celda a celda)
 	private Point2D.Float positionOffsetConstants = new Point2D.Float (0, 0); // Se usa en el dibujado, es lo que hay que añadir al offset a cada frame
+	private transient xaos.graphics.Animation keyframeAnimation;
+
+	public xaos.graphics.Animation getKeyframeAnimation() {
+		if (keyframeAnimation == null) {
+			keyframeAnimation = new xaos.graphics.Animation();
+		}
+		return keyframeAnimation;
+	}
 
 	private transient int checkLOSCounter;
 	private transient int skillAnimationCounter;
@@ -555,11 +563,13 @@ public abstract class LivingEntity extends Entity {
 		pTMP.y = 0;
 
 		if (getPath ().size () == 0) {
+			getKeyframeAnimation().setState(xaos.graphics.Animation.AnimationState.IDLE);
 			// Constants offset
 			Point2D.Float pTMP2 = getPositionOffsetConstants ();
 			pTMP2.x = 0;
 			pTMP2.y = 0;
 		} else {
+			getKeyframeAnimation().setState(xaos.graphics.Animation.AnimationState.WALK);
 			Point3DShort p3dDestino = getPath ().get (0);
 			updateFacingDirection (getX (), getY (), getZ (), p3dDestino.x, p3dDestino.y, p3dDestino.z);
 
@@ -3835,6 +3845,7 @@ public abstract class LivingEntity extends Entity {
 				LivingEntity leHate = getLivingEntityHate (getIniHeader (), point.x, point.y, point.z, getFocusData (), bAttackAllies);
 				if (leHate != null) {
 					doHit (this, leHate, true);
+					xaos.graphics.ParticleSystem.spawnBloodSparks(leHate.getX(), leHate.getY(), leHate.getZ());
 					if (leHate.getLivingEntityData ().getHealthPoints () <= 0) {
 						// clearPath ();
 						getFocusData ().setEntityID (-1);

@@ -302,8 +302,8 @@ public final class UIPanel {
 	private int minimapPanelX;
 	private int minimapPanelY;
 
-	private static Tile tileMinimapPanel;
-	private static boolean tileMinimapPanelAlpha[][];
+	public static Tile tileMinimapPanel;
+	public static boolean tileMinimapPanelAlpha[][];
 
 	// Open/close production
 	private static boolean tileOpenProductionPanelAlpha[][];
@@ -887,12 +887,12 @@ public final class UIPanel {
 
 		PIXELS_TO_BORDER = renderWidth / 80;
 
-		// MINIMAP
-		MINIMAP_PANEL_WIDTH = tileMinimapPanel.getTileWidth ();
-		MINIMAP_PANEL_HEIGHT = tileMinimapPanel.getTileHeight ();
+		// MINIMAP (Modern Minimalist Radar Box)
+		MINIMAP_PANEL_WIDTH = 130;
+		MINIMAP_PANEL_HEIGHT = 130;
 
-		minimapPanelX = renderWidth - MINIMAP_PANEL_WIDTH - PIXELS_TO_BORDER;
-		minimapPanelY = PIXELS_TO_BORDER;
+		minimapPanelX = renderWidth - MINIMAP_PANEL_WIDTH - 24;
+		minimapPanelY = 54;
 		MiniMapPanel.initialize (minimapPanelX, minimapPanelY, MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT);
 
 		/*
@@ -1086,509 +1086,16 @@ public final class UIPanel {
 		int mousePanel = isMouseOnAPanel (mouseX, mouseY, true);
 
 		/*
-		 * BOTTOM menu panel
+		 * MODERN GLASSMORPHISM UI SYSTEM
 		 */
-		int iCurrentTexture = BottomMenuUIPanel.tileBottomScrollLeft.getTextureID (); // Esta textura es la primera quese usa en el bottom menu
-		GL11.glBindTexture (GL11.GL_TEXTURE_2D, iCurrentTexture);
-		GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-		GL11.glColor4f (1, 1, 1, 1);
-		UtilsGL.glBegin (GL11.GL_QUADS);
-
-		BottomMenuUIPanel.checkBlinkBottom = (blinkTurns >= MAX_BLINK_TURNS / 2) && TutorialFlow.isBlinkBottom ();
-		if (BottomMenuUIPanel.isBottomMenuPanelActive ()) {
-			iCurrentTexture = BottomMenuUIPanel.renderBottomMenuPanel (mouseX, mouseY, mousePanel, iCurrentTexture);
-		}
-
-		// Rendereamos el botoncito para hacer visible/invisible el bottom panel
-		if (BottomMenuUIPanel.isBottomMenuPanelLocked ()) {
-			iCurrentTexture = UtilsGL.setTexture (tileOpenBottomMenuON, iCurrentTexture);
-			drawTile (tileOpenBottomMenuON, BottomMenuUIPanel.tileOpenCloseBottomMenuPoint, tileOpenBottomMenuON.getTileWidth (), tileOpenBottomMenuON.getTileHeight (), mousePanel == MOUSE_BOTTOM_OPENCLOSE);
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (BottomMenuUIPanel.tileOpenBottomMenu, iCurrentTexture);
-			if (BottomMenuUIPanel.checkBlinkBottom) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (BottomMenuUIPanel.tileOpenBottomMenu, BottomMenuUIPanel.tileOpenCloseBottomMenuPoint, BottomMenuUIPanel.tileOpenBottomMenu.getTileWidth (), BottomMenuUIPanel.tileOpenBottomMenu.getTileHeight (), mousePanel == MOUSE_BOTTOM_OPENCLOSE);
-			if (BottomMenuUIPanel.checkBlinkBottom) {
-				UtilsGL.unsetColor ();
-			}
-		}
-
-		/*
-		 * MINIMAP (textures)
-		 */
-		// Minimap background
-		iCurrentTexture = UtilsGL.setTexture (tileMinimapPanel, iCurrentTexture);
-		UtilsGL.drawTexture (minimapPanelX, minimapPanelY, minimapPanelX + MINIMAP_PANEL_WIDTH, minimapPanelY + MINIMAP_PANEL_HEIGHT, tileMinimapPanel.getTileSetTexX0 (), tileMinimapPanel.getTileSetTexY0 (), tileMinimapPanel.getTileSetTexX1 (), tileMinimapPanel.getTileSetTexY1 ());
-
-		UtilsGL.glEnd ();
-
-		// Minimap content
+		// 1. Modern Minimap Radar
 		MiniMapPanel.render ();
 
-		/*
-		 * MENU (right)
-		 */
-		RightMenuUIPanel.renderMenuPanel (mouseX, mouseY, mousePanel);
+		// 2. Modern Unified Top Status Ribbon
+		TopStatusRibbon.render (mouseX, mouseY, renderWidth, renderHeight);
 
-		// Possible mini icon blinks?
-		// Blink
-		TutorialFlow tutorialFlow = null;
-		if ((blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			if (Game.getCurrentMissionData () != null && ImagesPanel.getCurrentFlowIndex () >= 0 && ImagesPanel.getCurrentFlowIndex () < Game.getCurrentMissionData ().getTutorialFlows ().size ()) {
-				tutorialFlow = Game.getCurrentMissionData ().getTutorialFlows ().get (ImagesPanel.getCurrentFlowIndex ());
-			}
-		}
-
-		/*
-		 * Info
-		 */
-		iCurrentTexture = tileInfoPanel.getTextureID ();
-		GL11.glBindTexture (GL11.GL_TEXTURE_2D, iCurrentTexture);
-		GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-		UtilsGL.glBegin (GL11.GL_QUADS);
-		drawTile (tileInfoPanel, infoPanelPoint);
-		iCurrentTexture = UtilsGL.setTexture (tileDatePanel, iCurrentTexture);
-		drawTile (tileDatePanel, datePanelPoint);
-
-		// Level up/down
-		iCurrentTexture = UtilsGL.setTexture (tileIconLevelUp, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniLevelUp ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileIconLevelUp, iconLevelUpPoint, ICON_WIDTH, ICON_HEIGHT, mousePanel == MOUSE_ICON_LEVEL_UP);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniLevelUp ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconLevelDown, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniLevelDown ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileIconLevelDown, iconLevelDownPoint, ICON_WIDTH, ICON_HEIGHT, mousePanel == MOUSE_ICON_LEVEL_DOWN);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniLevelDown ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconLevel, iCurrentTexture);
-		drawTile (tileIconLevel, iconLevelPoint);
-
-		// Num citizens / soldiers / heroes / caravan
-		iCurrentTexture = UtilsGL.setTexture (tileBottomItem, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniCitizens ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileBottomItem, iconNumCitizensBackgroundPoint);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniCitizens ()) {
-			UtilsGL.unsetColor ();
-		}
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniSoldiers ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileBottomItem, iconNumSoldiersBackgroundPoint);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniSoldiers ()) {
-			UtilsGL.unsetColor ();
-		}
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniHeroes ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileBottomItem, iconNumHeroesBackgroundPoint);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniHeroes ()) {
-			UtilsGL.unsetColor ();
-		}
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniTrade ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileBottomItem, iconCaravanBackgroundPoint);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniTrade ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconNumCitizens, iCurrentTexture);
-		drawTile (tileIconNumCitizens, iconNumCitizensPoint, (mousePanel == MOUSE_INFO_NUM_CITIZENS));
-		iCurrentTexture = UtilsGL.setTexture (tileIconNumSoldiers, iCurrentTexture);
-		drawTile (tileIconNumSoldiers, iconNumSoldiersPoint, (mousePanel == MOUSE_INFO_NUM_SOLDIERS));
-		iCurrentTexture = UtilsGL.setTexture (tileIconNumHeroes, iCurrentTexture);
-		drawTile (tileIconNumHeroes, iconNumHeroesPoint, (mousePanel == MOUSE_INFO_NUM_HEROES));
-		if (Game.getWorld ().getCurrentCaravanData () != null) {
-			iCurrentTexture = UtilsGL.setTexture (tileIconCaravanON, iCurrentTexture);
-			drawTile (tileIconCaravanON, iconCaravanPoint, (mousePanel == MOUSE_INFO_CARAVAN));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (tileIconCaravan, iCurrentTexture);
-			drawTile (tileIconCaravan, iconCaravanPoint, (mousePanel == MOUSE_INFO_CARAVAN));
-		}
-
-		// Previous/next citizen/soldiers/heroes
-		iCurrentTexture = UtilsGL.setTexture (tileIconCitizenPrevious, iCurrentTexture);
-		if (mousePanel == MOUSE_ICON_CITIZEN_PREVIOUS) {
-			drawTile (tileIconCitizenPreviousON, iconCitizenPreviousPoint);
-		} else {
-			drawTile (tileIconCitizenPrevious, iconCitizenPreviousPoint);
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconCitizenNext, iCurrentTexture);
-		if (mousePanel == MOUSE_ICON_CITIZEN_NEXT) {
-			drawTile (tileIconCitizenNextON, iconCitizenNextPoint);
-		} else {
-			drawTile (tileIconCitizenNext, iconCitizenNextPoint);
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconSoldierPrevious, iCurrentTexture);
-		if (mousePanel == MOUSE_ICON_SOLDIER_PREVIOUS) {
-			drawTile (tileIconSoldierPreviousON, iconSoldierPreviousPoint);
-		} else {
-			drawTile (tileIconSoldierPrevious, iconSoldierPreviousPoint);
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconSoldierNext, iCurrentTexture);
-		if (mousePanel == MOUSE_ICON_SOLDIER_NEXT) {
-			drawTile (tileIconSoldierNextON, iconSoldierNextPoint);
-		} else {
-			drawTile (tileIconSoldierNext, iconSoldierNextPoint);
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconHeroPrevious, iCurrentTexture);
-		if (mousePanel == MOUSE_ICON_HERO_PREVIOUS) {
-			drawTile (tileIconHeroPreviousON, iconHeroPreviousPoint);
-		} else {
-			drawTile (tileIconHeroPrevious, iconHeroPreviousPoint);
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconHeroNext, iCurrentTexture);
-		if (mousePanel == MOUSE_ICON_HERO_NEXT) {
-			drawTile (tileIconHeroNextON, iconHeroNextPoint);
-		} else {
-			drawTile (tileIconHeroNext, iconHeroNextPoint);
-		}
-
-		// Panel icons (priorities, mats)
-		iCurrentTexture = UtilsGL.setTexture (MatsUIPanel.isMatsPanelActive () ? tileIconMatsON : tileIconMats, iCurrentTexture);
-		drawTile (MatsUIPanel.isMatsPanelActive () ? tileIconMatsON : tileIconMats, iconMatsPoint, (mousePanel == MOUSE_ICON_MATS));
-		iCurrentTexture = UtilsGL.setTexture (PrioritiesUIPanel.isPrioritiesPanelActive () ? tileIconPrioritiesON : tileIconPriorities, iCurrentTexture);
-		drawTile (PrioritiesUIPanel.isPrioritiesPanelActive () ? tileIconPrioritiesON : tileIconPriorities, iconPrioritiesPoint, (mousePanel == MOUSE_ICON_PRIORITIES));
-
-		// Coins
-		String sTownCoins = Game.getWorld ().getCoinsString ();
-		int iTownsCoinsWidth = UtilFont.getWidth (sTownCoins);
-		iCurrentTexture = UtilsGL.setTexture (tileIconCoins, iCurrentTexture);
-		drawTile (tileIconCoins, tileIconCoinsPoint.x - iTownsCoinsWidth / 2 - tileIconCoins.getTileWidth () / 2, tileIconCoinsPoint.y, false);
-
-		// Icons (miniblock + grid + settings + flat mouse + 3d mouse)
-		iCurrentTexture = UtilsGL.setTexture (MainPanel.bMiniBlocksON ? tileIconMiniblocksON : tileIconMiniblocks, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniFlat ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (MainPanel.bMiniBlocksON ? tileIconMiniblocksON : tileIconMiniblocks, iconMiniblocksPoint, (mousePanel == MOUSE_ICON_MINIBLOCKS));
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniFlat ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (MainPanel.gridON ? tileIconGridON : tileIconGrid, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniGrid ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (MainPanel.gridON ? tileIconGridON : tileIconGrid, iconGridPoint, (mousePanel == MOUSE_ICON_GRID));
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniGrid ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconSettings, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniSettings ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (tileIconSettings, iconSettingsPoint, (mousePanel == MOUSE_ICON_SETTINGS));
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniSettings ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIconFlatMouse, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniFlatCursor ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (MainPanel.flatMouseON ? tileIconFlatMouseON : tileIconFlatMouse, iconFlatMousePoint, (mousePanel == MOUSE_ICON_FLATMOUSE));
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniFlatCursor ()) {
-			UtilsGL.unsetColor ();
-		}
-		iCurrentTexture = UtilsGL.setTexture (tileIcon3DMouse, iCurrentTexture);
-		if (tutorialFlow != null && tutorialFlow.isBlinkMini3DMouse ()) {
-			UtilsGL.setColorRed ();
-		}
-		drawTile (MainPanel.tDMouseON ? tileIcon3DMouseON : tileIcon3DMouse, icon3DMousePoint, (mousePanel == MOUSE_ICON_3DMOUSE));
-		if (tutorialFlow != null && tutorialFlow.isBlinkMini3DMouse ()) {
-			UtilsGL.unsetColor ();
-		}
-
-		// Message icons
-		if (MessagesUIPanel.getMessagesPanelActive () == MessagesPanel.TYPE_ANNOUNCEMENT || (MessagesPanel.getBlink ()[MessagesPanel.TYPE_ANNOUNCEMENT] && blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTilesON[0], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTilesON[0], MessagesUIPanel.messageIconPoints[0], (mousePanel == MOUSE_MESSAGES_ICON_ANNOUNCEMENT));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTiles[0], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTiles[0], MessagesUIPanel.messageIconPoints[0], (mousePanel == MOUSE_MESSAGES_ICON_ANNOUNCEMENT));
-		}
-		if (MessagesUIPanel.getMessagesPanelActive () == MessagesPanel.TYPE_COMBAT || (MessagesPanel.getBlink ()[MessagesPanel.TYPE_COMBAT] && blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTilesON[1], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTilesON[1], MessagesUIPanel.messageIconPoints[1], (mousePanel == MOUSE_MESSAGES_ICON_COMBAT));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTiles[1], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTiles[1], MessagesUIPanel.messageIconPoints[1], (mousePanel == MOUSE_MESSAGES_ICON_COMBAT));
-		}
-		if (MessagesUIPanel.getMessagesPanelActive () == MessagesPanel.TYPE_HEROES || (MessagesPanel.getBlink ()[MessagesPanel.TYPE_HEROES] && blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTilesON[2], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTilesON[2], MessagesUIPanel.messageIconPoints[2], (mousePanel == MOUSE_MESSAGES_ICON_HEROES));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTiles[2], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTiles[2], MessagesUIPanel.messageIconPoints[2], (mousePanel == MOUSE_MESSAGES_ICON_HEROES));
-		}
-		if (MessagesUIPanel.getMessagesPanelActive () == MessagesPanel.TYPE_SYSTEM || (MessagesPanel.getBlink ()[MessagesPanel.TYPE_SYSTEM] && blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTilesON[3], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTilesON[3], MessagesUIPanel.messageIconPoints[3], (mousePanel == MOUSE_MESSAGES_ICON_SYSTEM));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (MessagesUIPanel.messageTiles[3], iCurrentTexture);
-			drawTile (MessagesUIPanel.messageTiles[3], MessagesUIPanel.messageIconPoints[3], (mousePanel == MOUSE_MESSAGES_ICON_SYSTEM));
-		}
-
-		// Events icon
-		iCurrentTexture = UtilsGL.setTexture (GlobalEventData.getIcon (), iCurrentTexture);
-		drawTile (GlobalEventData.getIcon (), iconEventsPoint, false);
-
-		// Gods icon
-		// if (TownsProperties.GODS_ACTIVATED) {
-		// iCurrentTexture = UtilsGL.setTexture (tileIconGods, iCurrentTexture);
-		// drawTile (tileIconGods, iconGodsPoint, false);
-		// }
-
-		// (speed down, pause/play, speed up)
-		if (World.SPEED > 1) {
-			iCurrentTexture = UtilsGL.setTexture (tileIconLowerSpeedON, iCurrentTexture);
-			if (tutorialFlow != null && tutorialFlow.isBlinkMiniSpeedDown ()) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (tileIconLowerSpeedON, iconLowerSpeedPoint, (mousePanel == MOUSE_ICON_LOWER_SPEED));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (tileIconLowerSpeed, iCurrentTexture);
-			if (tutorialFlow != null && tutorialFlow.isBlinkMiniSpeedDown ()) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (tileIconLowerSpeed, iconLowerSpeedPoint, false);
-		}
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniSpeedDown ()) {
-			UtilsGL.unsetColor ();
-		}
-		if (Game.isPaused ()) {
-			iCurrentTexture = UtilsGL.setTexture (tileIconResume, iCurrentTexture);
-			if (tutorialFlow != null && tutorialFlow.isBlinkMiniPause ()) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (tileIconResume, iconPauseResumePoint, (mousePanel == MOUSE_ICON_PAUSE_RESUME));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (tileIconPause, iCurrentTexture);
-			if (tutorialFlow != null && tutorialFlow.isBlinkMiniPause ()) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (tileIconPause, iconPauseResumePoint, (mousePanel == MOUSE_ICON_PAUSE_RESUME));
-		}
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniPause ()) {
-			UtilsGL.unsetColor ();
-		}
-		if (World.SPEED < World.SPEED_MAX) {
-			iCurrentTexture = UtilsGL.setTexture (tileIconIncreaseSpeedON, iCurrentTexture);
-			if (tutorialFlow != null && tutorialFlow.isBlinkMiniSpeedUp ()) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (tileIconIncreaseSpeedON, iconIncreaseSpeedPoint, (mousePanel == MOUSE_ICON_INCREASE_SPEED));
-		} else {
-			iCurrentTexture = UtilsGL.setTexture (tileIconIncreaseSpeed, iCurrentTexture);
-			if (tutorialFlow != null && tutorialFlow.isBlinkMiniSpeedUp ()) {
-				UtilsGL.setColorRed ();
-			}
-			drawTile (tileIconIncreaseSpeed, iconIncreaseSpeedPoint, false);
-		}
-		if (tutorialFlow != null && tutorialFlow.isBlinkMiniSpeedUp ()) {
-			UtilsGL.unsetColor ();
-		}
-
-		UtilsGL.glEnd ();
-
-		// Date
-		String sDate = Game.getWorld ().getDate ().toString ();
-		int dateW = UtilFont.getWidth (sDate);
-		int iLevel = World.MAP_NUM_LEVELS_OUTSIDE - Game.getWorld ().getView ().z;
-		String sLevel = Integer.toString (iLevel);
-		int sLevelW = UtilFont.getWidth (sLevel);
-		String sNumCitizens = Integer.toString (World.getNumCitizens ());
-		int numCitizensW = UtilFont.getWidth (sNumCitizens);
-		String sNumSoldiers = Integer.toString (World.getNumSoldiers ());
-		int numSoldiersW = UtilFont.getWidth (sNumSoldiers);
-		String sNumHeroes = Integer.toString (World.getNumHeroes ());
-		int numHeroesW = UtilFont.getWidth (sNumHeroes);
-
-		GL11.glBindTexture (GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
-		GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-		UtilsGL.glBegin (GL11.GL_QUADS);
-		UtilsGL.drawString (sLevel, iconLevelPoint.x + tileIconLevel.getTileWidth () / 2 - sLevelW / 2, iconLevelPoint.y + tileIconLevel.getTileHeight () / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.BLACK);
-		UtilsGL.drawString (sNumCitizens, iconNumCitizensPoint.x + tileIconNumCitizens.getTileWidth () / 2 - numCitizensW / 2, iconNumCitizensPoint.y + tileIconNumCitizens.getTileHeight (), ColorGL.BLACK);
-		UtilsGL.drawString (sNumSoldiers, iconNumSoldiersPoint.x + tileIconNumSoldiers.getTileWidth () / 2 - numSoldiersW / 2, iconNumSoldiersPoint.y + tileIconNumSoldiers.getTileHeight (), ColorGL.BLACK);
-		UtilsGL.drawString (sNumHeroes, iconNumHeroesPoint.x + tileIconNumHeroes.getTileWidth () / 2 - numHeroesW / 2, iconNumHeroesPoint.y + tileIconNumHeroes.getTileHeight (), ColorGL.BLACK);
-		UtilsGL.drawString (sDate, datePanelPoint.x + tileDatePanel.getTileWidth () / 2 - dateW / 2, datePanelPoint.y + tileDatePanel.getTileHeight () / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.BLACK);
-		UtilsGL.drawString (sTownCoins, tileIconCoinsPoint.x - iTownsCoinsWidth / 2 + tileIconCoins.getTileWidth () / 2, tileIconCoinsPoint.y + tileIconCoins.getTileHeight () / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.WHITE);
-
-		// Resource Manager Counter overlay (active only when a colonist is assigned to Resource Management)
-		boolean hasResourceManager = false;
-		ArrayList<Integer> citIDs = World.getCitizenIDs();
-		if (citIDs != null) {
-			for (int c = 0; c < citIDs.size(); c++) {
-				Citizen cit = (Citizen) World.getLivingEntityByID(citIDs.get(c));
-				if (cit != null && cit.getCitizenData() != null && !cit.getCitizenData().containsDeniedJob("_HAUL_")) {
-					hasResourceManager = true;
-					break;
-				}
-			}
-		}
-
-		// Performance Throttling: Run heavy inventory & save checks once per second (every 60 frames)
-		if (blinkTurns == 0) {
-			if (hasResourceManager) {
-				cachedWoodCount = xaos.tiles.entities.items.Item.getNumItemsTotal("rmwood", World.MAP_DEPTH - 1);
-				cachedStoneCount = xaos.tiles.entities.items.Item.getNumItemsTotal("rmstone", World.MAP_DEPTH - 1);
-				cachedOreCount = xaos.tiles.entities.items.Item.getNumItemsTotal("rmiron", World.MAP_DEPTH - 1) 
-						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmcopper", World.MAP_DEPTH - 1) 
-						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmsilver", World.MAP_DEPTH - 1) 
-						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmgold", World.MAP_DEPTH - 1)
-						+ xaos.tiles.entities.items.Item.getNumItemsTotal("rmcoal", World.MAP_DEPTH - 1);
-			}
-			cachedTotalFood = xaos.tiles.entities.items.Item.getNumItemsTotal("apple", World.MAP_DEPTH - 1)
-					+ xaos.tiles.entities.items.Item.getNumItemsTotal("bread", World.MAP_DEPTH - 1)
-					+ xaos.tiles.entities.items.Item.getNumItemsTotal("cookedfish", World.MAP_DEPTH - 1)
-					+ xaos.tiles.entities.items.Item.getNumItemsTotal("rawfish", World.MAP_DEPTH - 1)
-					+ xaos.tiles.entities.items.Item.getNumItemsTotal("cookedsteak", World.MAP_DEPTH - 1)
-					+ xaos.tiles.entities.items.Item.getNumItemsTotal("rawsteak", World.MAP_DEPTH - 1);
-		}
-
-		String zLevelTag = (iLevel >= 0) ? "[Z: +" + iLevel + " Surface]" : "[Z: " + iLevel + " Cavern]";
-		String resText;
-		if (hasResourceManager) {
-			resText = zLevelTag + "  🪵 Wood: " + cachedWoodCount + " | 🪨 Stone: " + cachedStoneCount + " | ⛏️ Ore: " + cachedOreCount + " | 🍖 Food: " + cachedTotalFood;
-			UtilsGL.drawStringWithBorder(resText, datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.ORANGE, ColorGL.BLACK);
-		} else {
-			resText = zLevelTag + "  🍖 Food: " + cachedTotalFood + " | [Assign Resource Manager for Totals]";
-			UtilsGL.drawStringWithBorder(resText, datePanelPoint.x + tileDatePanel.getTileWidth() + 15, datePanelPoint.y + tileDatePanel.getTileHeight() / 2 - UtilFont.MAX_HEIGHT / 2, ColorGL.YELLOW, ColorGL.BLACK);
-		}
-
-		// Engine Performance & FPS Badge
-		UtilsGL.drawStringWithBorder("⚡ 60 FPS", renderWidth - 85, 12, ColorGL.GREEN, ColorGL.BLACK);
-
-		// Low Food / Famine Alert Banner
-		if (cachedTotalFood < 10 && (blinkTurns >= MAX_BLINK_TURNS / 2)) {
-			String lowFoodMsg = "⚠️ LOW FOOD WARNING (" + cachedTotalFood + " remaining)!";
-			int msgW = UtilFont.getWidth(lowFoodMsg);
-			int bannerY = datePanelPoint.y + tileDatePanel.getTileHeight() + tileIconMats.getTileHeight() + 15;
-			UtilsGL.drawStringWithBorder(lowFoodMsg, renderWidth / 2 - msgW / 2, bannerY, ColorGL.RED, ColorGL.BLACK);
-		}
-
-		// Caravan Departure Countdown Tracker
-		if (Game.getWorld().getCurrentCaravanData() != null) {
-			int turnsLeft = Game.getWorld().getCurrentCaravanData().getTurnsToLeave();
-			int hoursLeft = turnsLeft / World.TIME_MODIFIER_HOUR;
-			UtilsGL.drawStringWithBorder("🚢 Merchant departs in: " + hoursLeft + "h", renderWidth - 220, 75, ColorGL.YELLOW, ColorGL.BLACK);
-		}
-
-		// Floating Modern Toast Notification Cards & Idle Settlers Tracker
-		if (World.getCitizenIDs() != null && !World.getCitizenIDs().isEmpty()) {
-			int totalPop = World.getCitizenIDs().size();
-			int idleCount = 0;
-			for (int c = 0; c < World.getCitizenIDs().size(); c++) {
-				Citizen cit = (Citizen) World.getLivingEntityByID(World.getCitizenIDs().get(c));
-				if (cit != null && cit.getCurrentTask() == null) {
-					idleCount++;
-				}
-			}
-			ColorGL statusColor = idleCount > 0 ? ColorGL.ORANGE : ColorGL.LIGHT_GRAY;
-			UtilsGL.drawStringWithBorder("🔔 Town Status: " + totalPop + " Settlers (" + idleCount + " Idle)", renderWidth - 270, 105, statusColor, ColorGL.BLACK);
-		}
-
-		// QoL Hotkey Hints Overlay & Game Speed Quick Indicator
-		int currentZLevel = (Game.getWorld() != null && Game.getWorld().getView() != null) ? Game.getWorld().getView().z : 0;
-		String speedLabel = "Speed: " + World.SPEED + "x " + (Game.isPaused() ? "(PAUSED)" : "(PLAYING)") + " | 📐 Elevation: Floor " + currentZLevel;
-		ColorGL speedColor = Game.isPaused() ? ColorGL.LIGHT_GRAY : ColorGL.GREEN;
-		UtilsGL.drawStringWithBorder(speedLabel, 15, renderHeight - 45, speedColor, ColorGL.BLACK);
-
-		String hotkeyGuide = "[F9] HUD | [Space] Pause | [1-4] Speed | [PgUp/PgDn] Elevation | [Ctrl+Wheel] Zoom | [MMB Drag] Pan";
-		UtilsGL.drawStringWithBorder(hotkeyGuide, 15, renderHeight - 25, ColorGL.YELLOW, ColorGL.BLACK);
-
-		// Real-Time Minimap Radar Overlay Engine (Bottom-Right HUD Card)
-		if (Game.getWorld() != null && Game.getWorld().getView() != null) {
-			int miniW = 120;
-			int miniH = 120;
-			int miniX = renderWidth - miniW - 15;
-			int miniY = renderHeight - miniH - 15;
-
-			// Minimap Background Card
-			UtilsGL.drawRectangle(miniX - 4, miniY - 4, miniX + miniW + 4, miniY + miniH + 4, ColorGL.BLACK, 0.75f);
-			UtilsGL.drawRectangleBorder(miniX - 4, miniY - 4, miniX + miniW + 4, miniY + miniH + 4, ColorGL.ORANGE);
-			UtilsGL.drawStringWithBorder("🧭 Minimap", miniX + 25, miniY - 18, ColorGL.YELLOW, ColorGL.BLACK);
-
-			// Render Citizens (Green Dots) & Camera View Box (White Outline)
-			if (World.getCitizenIDs() != null) {
-				for (int c = 0; c < World.getCitizenIDs().size(); c++) {
-					Citizen cit = (Citizen) World.getLivingEntityByID(World.getCitizenIDs().get(c));
-					if (cit != null && cit.getCoordinates() != null) {
-						int px = miniX + (int) ((cit.getCoordinates().x / (float) World.MAP_WIDTH) * miniW);
-						int py = miniY + (int) ((cit.getCoordinates().y / (float) World.MAP_HEIGHT) * miniH);
-						UtilsGL.drawRectangle(px, py, px + 3, py + 3, ColorGL.GREEN, 1.0f);
-					}
-				}
-			}
-
-			// Camera Position Frame
-			int camPx = miniX + (int) ((Game.getWorld().getView().x / (float) World.MAP_WIDTH) * miniW);
-			int camPy = miniY + (int) ((Game.getWorld().getView().y / (float) World.MAP_HEIGHT) * miniH);
-			UtilsGL.drawRectangleBorder(camPx - 6, camPy - 6, camPx + 12, camPy + 12, ColorGL.WHITE);
-		}
-
-		// Atmospheric Dynamic Weather & Season Particles (Rain drops / Snow flurries)
-		long gameTime = System.currentTimeMillis();
-		boolean isSnowing = (Game.getWorld() != null && Game.getWorld().getDate() != null && Game.getWorld().getDate().getMonth() == 12);
-		ColorGL precipColor = isSnowing ? ColorGL.WHITE : ColorGL.LIGHT_GRAY;
-		for (int p = 0; p < 40; p++) {
-			int px = (int) ((p * 47 + gameTime / (isSnowing ? 8 : 3)) % renderWidth);
-			int py = (int) ((p * 83 + gameTime / (isSnowing ? 6 : 2)) % renderHeight);
-			UtilsGL.drawRectangle(px, py, px + (isSnowing ? 2 : 1), py + (isSnowing ? 2 : 4), precipColor, 0.4f);
-		}
-
-		// Performance & FPS Overlay (F9)
-		if (showPerformanceHUD) {
-			long freeMem = Runtime.getRuntime().freeMemory() / (1024 * 1024);
-			long maxMem = Runtime.getRuntime().maxMemory() / (1024 * 1024);
-			long totalMem = Runtime.getRuntime().totalMemory() / (1024 * 1024);
-			int pendingTasks = (Game.getWorld() != null && Game.getWorld().getTaskManager() != null) ? Game.getWorld().getTaskManager().getTaskItems().size() : 0;
-			UtilsGL.drawStringWithBorder("[F9 HUD] Memory: " + (totalMem - freeMem) + "/" + maxMem + " MB | Active Tasks: " + pendingTasks, 15, renderHeight - 65, ColorGL.GREEN, ColorGL.BLACK);
-		}
-
-		if (TownsProperties.DEBUG_MODE) {
-			// Global events
-			GlobalEventData ged = Game.getWorld ().getGlobalEvents ();
-			UtilsGL.drawStringWithBorder ("Shadows " + ged.isShadows (), 2, 3 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK); //$NON-NLS-1$
-			UtilsGL.drawStringWithBorder ("Half shadows " + ged.isHalfShadows (), 2, 4 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK); //$NON-NLS-1$
-			UtilsGL.drawStringWithBorder ("RGB " + ged.getRed () + "," + ged.getGreen () + "," + ged.getBlue (), 2, 5 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			UtilsGL.drawStringWithBorder ("waitPCT " + ged.getWaitPCT (), 2, 6 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK); //$NON-NLS-1$
-			UtilsGL.drawStringWithBorder ("walkSpeedPCT " + ged.getWalkSpeedPCT (), 2, 7 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK); //$NON-NLS-1$
-
-			// Events
-			StringBuffer sbEvents = new StringBuffer ("Events: "); //$NON-NLS-1$
-			for (int e = 0; e < Game.getWorld ().getEvents ().size (); e++) {
-				sbEvents.append (Game.getWorld ().getEvents ().get (e).getEventID ());
-				sbEvents.append (" ("); //$NON-NLS-1$
-				sbEvents.append (Game.getWorld ().getEvents ().get (e).getTurns ());
-				sbEvents.append (")"); //$NON-NLS-1$
-				sbEvents.append (", "); //$NON-NLS-1$
-			}
-
-			UtilsGL.drawStringWithBorder (sbEvents.toString (), 2, 2 + 9 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK);
-
-			// Gods
-			//			sbEvents = new StringBuffer ("Gods: "); //$NON-NLS-1$
-			// for (int e = 0; e < Game.getWorld ().getGods ().size (); e++) {
-			// sbEvents.append (Game.getWorld ().getGods ().get (e).getGodID ());
-			//				sbEvents.append (" ("); //$NON-NLS-1$
-			// sbEvents.append (Game.getWorld ().getGods ().get (e).getStatus ());
-			//				sbEvents.append (")"); //$NON-NLS-1$
-			//				sbEvents.append (", "); //$NON-NLS-1$
-			// }
-			//
-			// UtilsGL.drawStringWithBorder (sbEvents.toString (), 2, 2 + 10 * UtilFont.MAX_HEIGHT, ColorGL.WHITE, ColorGL.BLACK);
-		}
-
-		UtilsGL.glEnd ();
+		// 3. Modern Consolidated Bottom Action Dock
+		ActionDockPanel.render (mouseX, mouseY, renderWidth, renderHeight);
 
 		// Task
 		renderTask ();
@@ -1599,8 +1106,9 @@ public final class UIPanel {
 		/*
 		 * PANELS, PRODUCTION PANEL, PRIORITIES PANEL, TRADE_PANEL (este va encima de todo siempre)
 		 */
-		ProductionUIPanel.renderProductionPanel (mouseX, mouseY, mousePanel);
-
+		if (ProductionUIPanel.isProductionPanelActive ()) {
+			ProductionUIPanel.renderProductionPanel (mouseX, mouseY, mousePanel);
+		}
 		if (PileUIPanel.isPilePanelActive ()) {
 			PileUIPanel.renderPilePanel (mouseX, mouseY, mousePanel);
 		}
@@ -1643,56 +1151,54 @@ public final class UIPanel {
 	 * @param tiles
 	 */
 	public static void renderBackground (Tile[] tiles, Point point, int width, int height) {
-		// Modern Dark Glassmorphic Card Backdrop with Gold Accent Bar
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, tileTooltipBackground.getTextureID());
-		GL11.glColor4f(0.06f, 0.08f, 0.12f, 0.85f);
-		UtilsGL.glBegin(GL11.GL_QUADS);
-		UtilsGL.drawTexture(point.x, point.y, point.x + width, point.y + height, tileTooltipBackground.getTileSetTexX0(), tileTooltipBackground.getTileSetTexY0(), tileTooltipBackground.getTileSetTexX1(), tileTooltipBackground.getTileSetTexY1());
-		GL11.glColor4f(0.90f, 0.70f, 0.20f, 0.90f);
-		UtilsGL.drawTexture(point.x, point.y, point.x + 3, point.y + height, tileTooltipBackground.getTileSetTexX0(), tileTooltipBackground.getTileSetTexY0(), tileTooltipBackground.getTileSetTexX1(), tileTooltipBackground.getTileSetTexY1());
-		UtilsGL.glEnd();
-		UtilsGL.unsetColor();
+		if (tiles == null || tiles.length < 9 || tiles[0] == null) {
+			return;
+		}
 
-		int iEdgeWidth = tiles[6].getTileWidth ();
-		int iEdgeHeight = tiles[6].getTileHeight ();
+		int x0 = point.x;
+		int y0 = point.y;
+		int x1 = point.x + width;
+		int y1 = point.y + height;
 
-		// Background
-		Tile tile = tiles[0];
-		GL11.glBindTexture(GL11.GL_TEXTURE_2D, tile.getTextureID());
-		UtilsGL.glBegin(GL11.GL_QUADS);
-		UtilsGL.drawTexture (point.x + iEdgeWidth, point.y + iEdgeHeight, point.x + width - iEdgeWidth, point.y + height - iEdgeHeight, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		int nwW = (tiles[6] != null) ? tiles[6].getTileWidth () : 16;
+		int nwH = (tiles[6] != null) ? tiles[6].getTileHeight () : 16;
+		int neW = (tiles[5] != null) ? tiles[5].getTileWidth () : 16;
+		int neH = (tiles[5] != null) ? tiles[5].getTileHeight () : 16;
+		int swW = (tiles[8] != null) ? tiles[8].getTileWidth () : 16;
+		int swH = (tiles[8] != null) ? tiles[8].getTileHeight () : 16;
+		int seW = (tiles[7] != null) ? tiles[7].getTileWidth () : 16;
+		int seH = (tiles[7] != null) ? tiles[7].getTileHeight () : 16;
 
-		// N
-		tile = tiles[1];
-		UtilsGL.drawTexture (point.x + iEdgeWidth, point.y, point.x + width - iEdgeWidth, point.y + iEdgeHeight, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		// Center background fill
+		if (tiles[0] != null) {
+			drawTile (tiles[0], x0 + nwW, y0 + nwH, width - nwW - neW, height - nwH - seH, false);
+		}
 
-		// S
-		tile = tiles[2];
-		UtilsGL.drawTexture (point.x + iEdgeWidth, point.y + height - iEdgeHeight, point.x + width - iEdgeWidth, point.y + height, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		// North edge
+		if (tiles[1] != null) {
+			drawTile (tiles[1], x0 + nwW, y0, width - nwW - neW, nwH, false);
+		}
 
-		// E
-		tile = tiles[3];
-		UtilsGL.drawTexture (point.x + width - iEdgeWidth, point.y + iEdgeHeight, point.x + width, point.y + height - iEdgeHeight, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		// South edge
+		if (tiles[2] != null) {
+			drawTile (tiles[2], x0 + swW, y1 - swH, width - swW - seW, swH, false);
+		}
 
-		// W
-		tile = tiles[4];
-		UtilsGL.drawTexture (point.x, point.y + iEdgeHeight, point.x + iEdgeWidth, point.y + height - iEdgeHeight, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		// West edge
+		if (tiles[4] != null) {
+			drawTile (tiles[4], x0, y0 + nwH, nwW, height - nwH - swH, false);
+		}
 
-		// NE
-		tile = tiles[5];
-		UtilsGL.drawTexture (point.x + width - iEdgeWidth, point.y, point.x + width, point.y + iEdgeHeight, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		// East edge
+		if (tiles[3] != null) {
+			drawTile (tiles[3], x1 - neW, y0 + neH, neW, height - neH - seH, false);
+		}
 
-		// NW
-		tile = tiles[6];
-		UtilsGL.drawTexture (point.x, point.y, point.x + iEdgeWidth, point.y + iEdgeHeight, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
-
-		// SE
-		tile = tiles[7];
-		UtilsGL.drawTexture (point.x + width - iEdgeWidth, point.y + height - iEdgeHeight, point.x + width, point.y + height, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
-
-		// SW
-		tile = tiles[8];
-		UtilsGL.drawTexture (point.x, point.y + height - iEdgeHeight, point.x + iEdgeWidth, point.y + height, tile.getTileSetTexX0 (), tile.getTileSetTexY0 (), tile.getTileSetTexX1 (), tile.getTileSetTexY1 ());
+		// Corners (NW, NE, SW, SE)
+		if (tiles[6] != null) drawTile (tiles[6], x0, y0, nwW, nwH, false);
+		if (tiles[5] != null) drawTile (tiles[5], x1 - neW, y0, neW, neH, false);
+		if (tiles[8] != null) drawTile (tiles[8], x0, y1 - swH, swW, swH, false);
+		if (tiles[7] != null) drawTile (tiles[7], x1 - seW, y1 - seH, seW, seH, false);
 	}
 
 	/**
@@ -1713,47 +1219,28 @@ public final class UIPanel {
 		}
 
 		String taskString = task.toString ();
-		int taskX = MessagesUIPanel.messageIconPoints[0].x;
-		int taskY = MessagesUIPanel.messageIconPoints[0].y + MessagesUIPanel.messageTiles[0].getTileHeight () + PIXELS_TO_BORDER;
+		int taskX = 20;
+		int taskY = 48;
 		int taskWidth = UtilFont.getWidth (taskString);
-		int taskHeight = UtilFont.MAX_HEIGHT;
 
-		// Render del icono de la tarea
-		if (Game.getCurrentState () == Game.STATE_CREATING_TASK) {
-			Tile tile = Game.getCurrentTask ().getTile ();
-			if (tile != null) {
-				// XAVI GL11.glColor4f (1, 1, 1, 1);
+		// Solid dark medieval badge
+		UtilsGL.drawMedievalBox (taskX, taskY, taskX + taskWidth + 44, taskY + 28);
 
-				// Round button
-				GL11.glBindTexture (GL11.GL_TEXTURE_2D, tileBottomItem.getTextureID ());
-				GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-				UtilsGL.glBegin (GL11.GL_QUADS);
-				drawTile (tileBottomItem, taskX, taskY, BOTTOM_ITEM_WIDTH, BOTTOM_ITEM_HEIGHT, false);
-				UtilsGL.glEnd ();
-
-				// Icon
-				GL11.glBindTexture (GL11.GL_TEXTURE_2D, tile.getTextureID ());
-				GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-				UtilsGL.glBegin (GL11.GL_QUADS);
-				drawTile (tile, taskX, taskY, BOTTOM_ITEM_WIDTH, BOTTOM_ITEM_HEIGHT, false);
-				UtilsGL.glEnd ();
-
-				taskX += (BOTTOM_ITEM_WIDTH + PIXELS_TO_BORDER);
-				taskY += (BOTTOM_ITEM_HEIGHT / 4);
-			}
+		Tile tile = Game.getCurrentTask ().getTile ();
+		if (tile != null) {
+			GL11.glEnable (GL11.GL_TEXTURE_2D);
+			GL11.glColor4f (1.0f, 1.0f, 1.0f, 1.0f);
+			GL11.glBindTexture (GL11.GL_TEXTURE_2D, tile.getTextureID ());
+			UtilsGL.glBegin (GL11.GL_QUADS);
+			drawTile (tile, taskX + 4, taskY + 2, 24, 24, false);
+			UtilsGL.glEnd ();
 		}
 
-		GL11.glBindTexture (GL11.GL_TEXTURE_2D, UIPanel.BLACK_TILE.getTextureID ());
-		GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
-		UtilsGL.glBegin (GL11.GL_QUADS);
-		UtilsGL.drawTexture (taskX, taskY, taskX + taskWidth + 2, taskY + taskHeight + 2, UIPanel.BLACK_TILE.getTileSetTexX0 (), UIPanel.BLACK_TILE.getTileSetTexY0 (), UIPanel.BLACK_TILE.getTileSetTexX1 (), UIPanel.BLACK_TILE.getTileSetTexY1 ());
-		UtilsGL.glEnd ();
-
-		// Texto
+		GL11.glEnable (GL11.GL_TEXTURE_2D);
 		GL11.glBindTexture (GL11.GL_TEXTURE_2D, Game.TEXTURE_FONT_ID);
 		GL11.glTexEnvf (GL11.GL_TEXTURE_ENV, GL11.GL_TEXTURE_ENV_MODE, GL11.GL_MODULATE);
 		UtilsGL.glBegin (GL11.GL_QUADS);
-		UtilsGL.drawString (taskString, taskX + 1, taskY + 1);
+		UtilsGL.drawStringWithBorder (taskString, taskX + 32, taskY + 6, new ColorGL (0.96f, 0.90f, 0.78f), ColorGL.BLACK);
 		UtilsGL.glEnd ();
 	}
 
@@ -2968,6 +2455,13 @@ public final class UIPanel {
 //			return MOUSE_NONE;
 		}
 
+		if (ActionDockPanel.isMouseOverDock(x, y, renderWidth, renderHeight)) {
+			return MOUSE_BOTTOM_PANEL;
+		}
+		if (y >= 8 && y <= 42 && x >= 16 && x <= renderWidth - 16) {
+			return MOUSE_DATEPANEL;
+		}
+
 		/*
 		 * PROFESSIONS PANEL
 		 */
@@ -3565,6 +3059,13 @@ public final class UIPanel {
 	 * @param mouseButton
 	 */
 	public void mousePressed (int x, int y, int mouseButton) {
+		if (TopStatusRibbon.handleClick(x, y, renderWidth)) {
+			return;
+		}
+		if (ActionDockPanel.handleClick(x, y, renderWidth, renderHeight)) {
+			return;
+		}
+
 		int iPanel = isMouseOnAPanel (x, y);
 
 		if (iPanel == MOUSE_NONE) {

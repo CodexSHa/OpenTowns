@@ -995,6 +995,10 @@ public final class Game {
 
 		if (getCurrentContextMenu () != null) {
 			setCurrentState (STATE_SHOWING_CONTEXT_MENU);
+			int mouseX = xaos.compat.input.Mouse.getX();
+			int mouseY = xaos.compat.opengl.Display.getHeight() - xaos.compat.input.Mouse.getY() - 1;
+			Point3D tile = (menu.getSmartMenu() != null) ? menu.getSmartMenu().getDirectCoordinates() : null;
+			xaos.panels.RadialMenuPanel.open(mouseX, mouseY, tile);
 		}
 	}
 
@@ -1157,18 +1161,34 @@ public final class Game {
 					// Botón izquierdo pulsado, miramos a qué panel pertenece y llamamos a su función mousePressed (x, y) (con x e y relativas al panel)
 					// Primero miramos que no haya un contextmenu
 					if (getCurrentState () == STATE_SHOWING_CONTEXT_MENU) {
+						if (xaos.panels.RadialMenuPanel.isActive ()) {
+							if (xaos.panels.RadialMenuPanel.handleClick (mouseX, mouseY)) {
+								deleteCurrentContextMenu ();
+								continue;
+							}
+						}
 						// Context menú, miramos donde clica
-						if (mouseX >= getCurrentContextMenu ().getX () && mouseX < (getCurrentContextMenu ().getX () + getCurrentContextMenu ().getWidth ()) && mouseY >= getCurrentContextMenu ().getY () && mouseY < (getCurrentContextMenu ().getY () + getCurrentContextMenu ().getHeight ())) {
+						if (getCurrentContextMenu () != null && mouseX >= getCurrentContextMenu ().getX () && mouseX < (getCurrentContextMenu ().getX () + getCurrentContextMenu ().getWidth ()) && mouseY >= getCurrentContextMenu ().getY () && mouseY < (getCurrentContextMenu ().getY () + getCurrentContextMenu ().getHeight ())) {
 							getCurrentContextMenu ().mousePressed (mouseX - getCurrentContextMenu ().getX (), mouseY - getCurrentContextMenu ().getY ());
 						} else {
 							// Cierra el menú
 							deleteCurrentContextMenu ();
 						}
 					} else {
+						if (xaos.panels.CitizenInspectorPanel.handleClick(mouseX, mouseY)) {
+							continue;
+						}
 						if (getPanelUI ().isMouseOnAPanel (mouseX, mouseY) != UIPanel.MOUSE_NONE) {
 							getPanelUI ().mousePressed (mouseX, mouseY, mouseButton);
 						} else {
 							getPanelMain ().mousePressed (mouseX, mouseY, mouseButton);
+							Point3D p3d = MainPanel.pointTileMouse;
+							if (p3d != null) {
+								Cell cell = World.getCell(p3d);
+								if (cell != null && cell.getLivings() != null && !cell.getLivings().isEmpty()) {
+									xaos.panels.CitizenInspectorPanel.setInspectedEntity(cell.getLivings().get(0));
+								}
+							}
 						}
 					}
 				} else if (mouseButton == 1) {

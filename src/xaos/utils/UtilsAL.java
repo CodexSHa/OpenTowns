@@ -39,15 +39,19 @@ public final class UtilsAL {
     public final static String SOURCE_MUSIC_INGAME = "musicIG"; //$NON-NLS-1$
 
     public final static String SOURCE_FX_CLICK = "fxclick"; //$NON-NLS-1$
-
-//	public final static String SOURCE_FX_CHOP = 6;
+    public final static String SOURCE_FX_CHOP = "fxchop"; //$NON-NLS-1$
     public final static String SOURCE_FX_MINE = "fxmine"; //$NON-NLS-1$
-//	public final static String SOURCE_FX_DIG = 8;
     public final static String SOURCE_FX_EAT = "fxeat"; //$NON-NLS-1$
-
     public final static String SOURCE_FX_DEAD = "fxdead"; //$NON-NLS-1$
-
+    public final static String SOURCE_FX_DEAD_FEMALE = "fxdeadfemale"; //$NON-NLS-1$
+    public final static String SOURCE_FX_DEAD_MALE = "fxdeadmale"; //$NON-NLS-1$
     public final static String SOURCE_FX_BUILDING = "fxbuilding"; //$NON-NLS-1$
+    public final static String SOURCE_FX_CARAVAN = "fxcaravan"; //$NON-NLS-1$
+    public final static String SOURCE_FX_NEWHERO = "fxnewhero"; //$NON-NLS-1$
+    public final static String SOURCE_FX_NEWIMMIGRANTS = "fxnewimmigrants"; //$NON-NLS-1$
+    public final static String SOURCE_FX_CHORUS = "fxchorus"; //$NON-NLS-1$
+    public final static String SOURCE_FX_NIGHTTIME = "fxnighttime"; //$NON-NLS-1$
+    public final static String SOURCE_FX_ROOSTER = "fxrooster"; //$NON-NLS-1$
 
     private static final int FX_SOURCE_COUNT = 8;
 
