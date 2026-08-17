@@ -65,7 +65,7 @@ import xaos.setup.SteamLocator;
 public final class Launcher {
 
     private static final int WIDTH = 480;
-    private static final int HEIGHT = 600;
+    private static final int HEIGHT = 640;
 
     // Neutral graphite palette; green is reserved for the Play button.
     private static final float[] COLOR_BG = {0.114f, 0.118f, 0.129f};
@@ -86,8 +86,8 @@ public final class Launcher {
     private static final float SIZE_BUTTON = 18;
     private static final float SIZE_TITLE = 26;
 
-    private static final int MOD_ROW_HEIGHT = 24;
-    private static final int MOD_ROWS_VISIBLE = 5;
+    private static final int MOD_ROW_HEIGHT = 26;
+    private static final int MOD_ROWS_VISIBLE = 4;
 
     private static long window = MemoryUtil.NULL;
     private static GLFWErrorCallback errorCallback;
@@ -105,6 +105,7 @@ public final class Launcher {
     private static boolean quitPressed;
 
     private static int modScroll;
+    private static String selectedMod;
 
     // Window-size presets the stepper walks through (filtered to the desktop).
     private static final ArrayList<int[]> resolutions = new ArrayList<int[]>();
@@ -422,14 +423,17 @@ public final class Launcher {
 
         // Mods
         text("Mods", margin, rowY, SIZE_LABEL, COLOR_TEXT);
-        text("loaded at startup", WIDTH - margin - textWidth("loaded at startup", SIZE_SMALL), rowY + 3,
+        text("priority: top to bottom", WIDTH - margin - textWidth("priority: top to bottom", SIZE_SMALL), rowY + 3,
                 SIZE_SMALL, COLOR_DIM);
         rowY += 24;
         drawModList(margin, rowY, WIDTH - 2 * margin, MOD_ROWS_VISIBLE * MOD_ROW_HEIGHT + 8);
-        rowY += MOD_ROWS_VISIBLE * MOD_ROW_HEIGHT + 8;
+        rowY += MOD_ROWS_VISIBLE * MOD_ROW_HEIGHT + 14;
+
+        drawModDetails(margin, rowY, WIDTH - 2 * margin, 44);
+        rowY += 44;
 
         textCentered("Settings are saved to your Towns user folder when you press Play",
-                WIDTH / 2f, rowY + 8, SIZE_SMALL, COLOR_DIM);
+                WIDTH / 2f, rowY + 14, SIZE_SMALL, COLOR_DIM);
 
         // Play, gated on the assets being in place
         if (button((WIDTH - 180) / 2f, HEIGHT - 62, 180, 44, "Play", assetState == AssetState.PRESENT)) {
@@ -635,10 +639,16 @@ public final class Launcher {
             return;
         }
 
+        if (selectedMod == null && !config.availableMods.isEmpty()) {
+            selectedMod = config.availableMods.get(0);
+        }
+
         int maxScroll = Math.max(0, config.availableMods.size() - MOD_ROWS_VISIBLE);
         if (scrollY != 0 && mouseX >= x && mouseX <= x + width && mouseY >= y && mouseY <= y + height) {
             modScroll = Math.max(0, Math.min(maxScroll, modScroll - (int) Math.signum(scrollY)));
         }
+
+        float btnSize = 18;
 
         for (int row = 0; row < MOD_ROWS_VISIBLE; row++) {
             int index = modScroll + row;
@@ -646,28 +656,111 @@ public final class Launcher {
                 break;
             }
             String mod = config.availableMods.get(index);
-            boolean missing = !config.modExistsOnDisk(mod);
-            float rowY = y + 6 + row * MOD_ROW_HEIGHT;
-            boolean checked = config.enabledMods.contains(mod);
-            String label = missing ? mod + " (missing)" : mod;
-            boolean newChecked = labeledCheckbox(label, x + 10, rowY, checked, !missing || checked);
-            if (newChecked != checked) {
-                if (newChecked) {
-                    config.enabledMods.add(mod);
-                } else {
-                    config.enabledMods.remove(mod);
+            ModInfo info = config.getModInfo(mod);
+            boolean missing = !info.existsOnDisk();
+            float rowY = y + 4 + row * MOD_ROW_HEIGHT;
+            boolean checked = config.isModEnabled(mod);
+            boolean isSelected = mod.equals(selectedMod);
+
+            // Highlight selected row
+            if (isSelected) {
+                setColor(COLOR_PANEL_HOVER);
+                rect(x + 2, rowY - 1, width - 4, MOD_ROW_HEIGHT - 2);
+            }
+
+            // Checkbox on left
+            float boxX = x + 8;
+            float boxY = rowY + 3;
+            float boxSize = 14;
+            setColor(COLOR_PANEL);
+            rect(boxX, boxY, boxSize, boxSize);
+            outline(boxX, boxY, boxSize, boxSize);
+            if (checked) {
+                setColor(missing ? COLOR_DIM : COLOR_FILL);
+                rect(boxX + 3, boxY + 3, boxSize - 6, boxSize - 6);
+            }
+
+            // Checkbox click
+            if (mouseOver(boxX - 2, boxY - 2, boxSize + 4, boxSize + 4) && mouseClicked) {
+                config.setModEnabled(mod, !checked);
+                selectedMod = mod;
+            } else if (mouseOver(x + 2, rowY - 1, width - 50, MOD_ROW_HEIGHT - 2) && mouseClicked) {
+                selectedMod = mod;
+            }
+
+            // Name and Badge
+            float labelX = boxX + boxSize + 8;
+            String name = missing ? info.getName() + " (missing)" : info.getName();
+            float maxNameWidth = width - 120;
+            String fittedName = fit(name, SIZE_LABEL, maxNameWidth);
+            text(fittedName, labelX, rowY + 1, SIZE_LABEL, missing ? COLOR_DIM : (isSelected ? COLOR_WHITE : COLOR_TEXT));
+
+            String badge = info.getBadge();
+            if (!badge.isEmpty() && !missing) {
+                float nameW = textWidth(fittedName, SIZE_LABEL);
+                float badgeX = labelX + nameW + 8;
+                if (badgeX + textWidth(badge, SIZE_SMALL) < width - 48) {
+                    text(badge, badgeX, rowY + 3, SIZE_SMALL, COLOR_DIM);
+                }
+            }
+
+            // Reorder buttons on right if enabled
+            if (checked) {
+                float btnX1 = x + width - 44;
+                float btnX2 = x + width - 22;
+                float btnY = rowY + 2;
+                boolean canUp = config.canMoveUp(mod);
+                boolean canDown = config.canMoveDown(mod);
+
+                if (miniButton(btnX1, btnY, btnSize, btnSize, "^", canUp)) {
+                    config.moveModUp(mod);
+                    selectedMod = mod;
+                }
+                if (miniButton(btnX2, btnY, btnSize, btnSize, "v", canDown)) {
+                    config.moveModDown(mod);
+                    selectedMod = mod;
                 }
             }
         }
 
         if (maxScroll > 0) {
             // Thin scroll indicator on the right edge of the list box.
-            float trackX = x + width - 6;
+            float trackX = x + width - 4;
             float thumbHeight = height * MOD_ROWS_VISIBLE / config.availableMods.size();
             float thumbY = y + (height - thumbHeight) * modScroll / maxScroll;
             setColor(COLOR_BORDER);
-            rect(trackX, thumbY, 3, thumbHeight);
+            rect(trackX, thumbY, 2, thumbHeight);
         }
+    }
+
+    private static void drawModDetails(float x, float y, float width, float height) {
+        panel(x, y, width, height);
+        if (selectedMod == null || config.availableMods.isEmpty()) {
+            text("Select a mod to view details", x + 10, y + 10, SIZE_SMALL, COLOR_DIM);
+            return;
+        }
+        ModInfo info = config.getModInfo(selectedMod);
+        if (info == null) {
+            return;
+        }
+
+        // Top line: Name + version + author / missing indicator
+        String header = info.getName();
+        String badge = info.getBadge();
+        if (!badge.isEmpty()) {
+            header += " (" + badge + ")";
+        }
+        if (!info.existsOnDisk()) {
+            header += " [Folder missing on disk]";
+        }
+        text(fit(header, SIZE_SMALL, width - 20), x + 10, y + 6, SIZE_SMALL, COLOR_TEXT);
+
+        // Bottom line: description or folder name
+        String desc = info.getDescription();
+        if (desc.isEmpty()) {
+            desc = "Folder: " + info.getFolderName();
+        }
+        text(fit(desc, SIZE_SMALL, width - 20), x + 10, y + 24, SIZE_SMALL, COLOR_DIM);
     }
 
     // ------------------------------------------------------------------
@@ -709,6 +802,16 @@ public final class Launcher {
         text(label, x + (size - textWidth(label, SIZE_LABEL)) / 2f, y + (size - SIZE_LABEL) / 2f - 1,
                 SIZE_LABEL, textColor);
         return hover && mouseClicked;
+    }
+
+    private static boolean miniButton(float x, float y, float w, float h, String label, boolean enabled) {
+        boolean hover = enabled && mouseOver(x, y, w, h);
+        setColor(hover ? COLOR_PANEL_HOVER : COLOR_PANEL);
+        rect(x, y, w, h);
+        outline(x, y, w, h);
+        float textW = textWidth(label, SIZE_SMALL);
+        text(label, x + (w - textW) / 2f, y + (h - SIZE_SMALL) / 2f - 1, SIZE_SMALL, enabled ? COLOR_TEXT : COLOR_DIM);
+        return enabled && hover && mouseClicked;
     }
 
     /** Label at x with the checkbox right after it; both are clickable. */

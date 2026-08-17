@@ -8,14 +8,15 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
 
 /**
  * The launcher's view of towns.ini: the pre-launch, player-facing subset
- * (window size, fullscreen, music/FX and volumes, enabled mods).
+ * (window size, fullscreen, music/FX and volumes, enabled mods and load order).
  *
  * Reads the same two config layers the game reads: the bundled towns.ini
  * (rooted at towns.home when set, like Towns.resolveHome) with the user-folder
@@ -39,22 +40,74 @@ final class LauncherConfig {
     boolean fx;
     int volumeFX = 10;
 
-    /** Mods checked on (the MODS= list), in their configured order. */
-    final LinkedHashSet<String> enabledMods = new LinkedHashSet<String>();
+    /** Mods checked on (the MODS= list), in their configured load order. */
+    final ArrayList<String> enabledMods = new ArrayList<String>();
     /** Every mod to show: folders found in the user mods folder plus any
      *  configured mod whose folder is missing (kept so a launcher visit
      *  never silently drops it from MODS=). */
     final ArrayList<String> availableMods = new ArrayList<String>();
+    /** Discovered mod metadata keyed by folder name. */
+    final Map<String, ModInfo> modInfoMap = new LinkedHashMap<String, ModInfo>();
 
     private final Path userTownsFolder;
 
-    private LauncherConfig(Path userTownsFolder) {
+    LauncherConfig(Path userTownsFolder) {
         this.userTownsFolder = userTownsFolder;
     }
 
     /** True when the mod folder exists on disk (false for a stale MODS= entry). */
     boolean modExistsOnDisk(String mod) {
-        return Files.isDirectory(userTownsFolder.resolve("mods").resolve(mod));
+        ModInfo info = getModInfo(mod);
+        return info != null && info.existsOnDisk();
+    }
+
+    /** Returns the metadata for a mod, loading it if not already cached. */
+    ModInfo getModInfo(String mod) {
+        ModInfo info = modInfoMap.get(mod);
+        if (info == null) {
+            Path modFolder = userTownsFolder.resolve("mods").resolve(mod);
+            info = ModInfo.load(modFolder, mod);
+            modInfoMap.put(mod, info);
+        }
+        return info;
+    }
+
+    boolean isModEnabled(String mod) {
+        return enabledMods.contains(mod);
+    }
+
+    void setModEnabled(String mod, boolean enabled) {
+        if (enabled) {
+            if (!enabledMods.contains(mod)) {
+                enabledMods.add(mod);
+            }
+        } else {
+            enabledMods.remove(mod);
+        }
+    }
+
+    boolean canMoveUp(String mod) {
+        int idx = enabledMods.indexOf(mod);
+        return idx > 0;
+    }
+
+    boolean canMoveDown(String mod) {
+        int idx = enabledMods.indexOf(mod);
+        return idx >= 0 && idx < enabledMods.size() - 1;
+    }
+
+    void moveModUp(String mod) {
+        int idx = enabledMods.indexOf(mod);
+        if (idx > 0) {
+            Collections.swap(enabledMods, idx, idx - 1);
+        }
+    }
+
+    void moveModDown(String mod) {
+        int idx = enabledMods.indexOf(mod);
+        if (idx >= 0 && idx < enabledMods.size() - 1) {
+            Collections.swap(enabledMods, idx, idx + 1);
+        }
     }
 
     static LauncherConfig load() {
@@ -85,8 +138,9 @@ final class LauncherConfig {
 
         String mods = merged.getProperty("MODS", "");
         for (String mod : mods.split(",")) {
-            if (!mod.trim().isEmpty()) {
-                config.enabledMods.add(mod.trim());
+            String trimmed = mod.trim();
+            if (!trimmed.isEmpty() && !config.enabledMods.contains(trimmed)) {
+                config.enabledMods.add(trimmed);
             }
         }
 
@@ -96,7 +150,9 @@ final class LauncherConfig {
         if (Files.isDirectory(modsFolder)) {
             try (DirectoryStream<Path> dirs = Files.newDirectoryStream(modsFolder, Files::isDirectory)) {
                 for (Path dir : dirs) {
-                    config.availableMods.add(dir.getFileName().toString());
+                    String folderName = dir.getFileName().toString();
+                    config.availableMods.add(folderName);
+                    config.modInfoMap.put(folderName, ModInfo.load(dir, folderName));
                 }
             } catch (IOException e) {
                 // Unreadable mods folder: show only the configured list.
@@ -106,6 +162,7 @@ final class LauncherConfig {
         for (String mod : config.enabledMods) {
             if (!config.availableMods.contains(mod)) {
                 config.availableMods.add(mod);
+                config.modInfoMap.put(mod, new ModInfo(mod, mod, "", "", "", false));
             }
         }
 

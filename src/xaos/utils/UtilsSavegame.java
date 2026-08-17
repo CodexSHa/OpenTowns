@@ -14,6 +14,7 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
+import xaos.Towns;
 import xaos.TownsProperties;
 import xaos.actions.ActionPriorityManager;
 import xaos.campaign.MissionData;
@@ -445,53 +446,51 @@ public final class UtilsSavegame {
      * @return
      */
     public static BuryData getRandomBuryData(String sServerName) {
+        Game.SAVEGAME_LOADING_VERSION = Game.SAVEGAME_VERSION;
         BuryData bd = new BuryData();
         String sBuryFolder = Game.getUserFolder() + Game.getFileSeparator() + Game.BURY_FOLDER1 + Game.getFileSeparator();
         File fBuryFolder = new File(sBuryFolder);
-        if (!fBuryFolder.exists()) {
-            return bd;
+        if (!fBuryFolder.exists() || fBuryFolder.list() == null || fBuryFolder.list().length == 0) {
+            UtilsFiles.provisionStarterBuryFiles(fBuryFolder);
         }
 
-        // Si le pasamos un servidor nos bajaremos un bury y lo cargaremos
-        String sBuryFile = null;
-        if (sServerName != null) {
-            sBuryFile = UtilsServer.getBuriedTown(sServerName, sBuryFolder);
+        File fBuryZip = null;
+        if (fBuryFolder.exists()) {
+            File[] files = fBuryFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
+            if (files != null && files.length > 0) {
+                fBuryZip = files[UtilsDice.getRandomBetween(0, files.length - 1)];
+            }
         }
 
-        // Buscamos un .zip a random
-        try {
-            File fBuryZip = null;
-            if (sBuryFile == null) {
-                String[] alFiles = fBuryFolder.list();
-                if (alFiles != null && alFiles.length > 0) {
-                    sBuryFile = alFiles[UtilsDice.getRandomBetween(0, (alFiles.length - 1))];
-                    fBuryZip = new File(sBuryFolder + sBuryFile);
+        // Bundled fallback
+        if (fBuryZip == null || !fBuryZip.exists()) {
+            File bundledDir = new File(Towns.resolveHome("data/bury"));
+            if (bundledDir.exists()) {
+                File[] files = bundledDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
+                if (files != null && files.length > 0) {
+                    fBuryZip = files[UtilsDice.getRandomBetween(0, files.length - 1)];
                 }
-            } else {
-                // Fichero fijo, bajado del servidor
-                fBuryZip = new File(sBuryFolder + sBuryFile);
             }
+        }
 
-            if (fBuryZip != null && fBuryZip.exists()) {
-                // Lo descomprimimos
-                ZipFile zipFile = new ZipFile(fBuryZip);
-                ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(fBuryZip)));
+        if (fBuryZip != null && fBuryZip.exists()) {
+            try (ZipFile zipFile = new ZipFile(fBuryZip);
+                 ZipInputStream zis = new ZipInputStream(new BufferedInputStream(new FileInputStream(fBuryZip)))) {
                 ZipEntry zipEntry = zis.getNextEntry();
-                InputStream is = zipFile.getInputStream(zipEntry);
-
-                // Cargamos
-                ObjectInputStream ois = new ObjectInputStream(is);
-                bd.readExternal(ois);
-
-                ois.close();
-                is.close();
-                zis.close();
-                zipFile.close();
-            } else {
-                Log.log(Log.LEVEL_ERROR, Messages.getString("Utils.17"), "Utils"); //$NON-NLS-1$ //$NON-NLS-2$
+                if (zipEntry != null) {
+                    try (InputStream is = zipFile.getInputStream(zipEntry);
+                         ObjectInputStream ois = new ObjectInputStream(is)) {
+                        bd.readExternal(ois);
+                    }
+                }
+            } catch (Exception e) {
+                Log.log(Log.LEVEL_ERROR, Messages.getString("BuryData.1") + " [" + e.toString() + "]", "Utils"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
             }
-        } catch (Exception e) {
-            Log.log(Log.LEVEL_ERROR, Messages.getString("BuryData.1") + " [" + e.toString() + "]", "Utils"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$
+        }
+
+        // If still empty or no points, generate a default ruin on the fly
+        if (bd.getHash() == null || bd.getHash().isEmpty()) {
+            bd = BuryData.createSampleRuin("ancient_dungeon");
         }
 
         return bd;

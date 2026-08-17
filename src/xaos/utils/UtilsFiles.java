@@ -256,6 +256,8 @@ public final class UtilsFiles {
             return null;
         }
 
+        provisionStarterBuryFiles(fFolderBury);
+
         File fFolderScreenshots = new File(fFolderTowns.getAbsolutePath() + System.getProperty("file.separator") + Game.SCREENSHOTS_FOLDER1 + System.getProperty("file.separator")); //$NON-NLS-1$ //$NON-NLS-2$
         if (!fFolderScreenshots.exists()) {
             fFolderScreenshots.mkdir();
@@ -267,6 +269,50 @@ public final class UtilsFiles {
         }
 
         return fFolderTowns;
+    }
+
+    public static void provisionStarterBuryFiles(File fBuryFolder) {
+        if (fBuryFolder == null || !fBuryFolder.exists()) {
+            return;
+        }
+        File[] existing = fBuryFolder.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
+        if (existing != null && existing.length > 0) {
+            return;
+        }
+
+        File bundledBury = new File(Towns.resolveHome("data/bury"));
+        if (bundledBury.exists() && bundledBury.isDirectory()) {
+            File[] bundledFiles = bundledBury.listFiles((dir, name) -> name.toLowerCase().endsWith(".zip"));
+            if (bundledFiles != null && bundledFiles.length > 0) {
+                for (File f : bundledFiles) {
+                    try {
+                        java.nio.file.Files.copy(f.toPath(), fBuryFolder.toPath().resolve(f.getName()), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+                    } catch (Exception ignored) {
+                    }
+                }
+                return;
+            }
+        }
+
+        generateStarterRuins(fBuryFolder);
+    }
+
+    public static void generateStarterRuins(File targetFolder) {
+        if (!targetFolder.exists()) {
+            targetFolder.mkdirs();
+        }
+        String[] types = {"ancient_dungeon", "ruined_catacombs", "forgotten_workshop"};
+        for (String type : types) {
+            File zip = new File(targetFolder, type + ".zip");
+            if (!zip.exists()) {
+                try {
+                    xaos.data.BuryData bd = xaos.data.BuryData.createSampleRuin(type);
+                    xaos.data.BuryData.saveToZip(bd, zip);
+                } catch (Exception e) {
+                    Log.log(Log.LEVEL_ERROR, "Failed to generate starter ruin " + type + ": " + e, "UtilsFiles");
+                }
+            }
+        }
     }
 
     /**

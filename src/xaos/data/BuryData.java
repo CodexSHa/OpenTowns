@@ -176,7 +176,8 @@ public class BuryData implements Externalizable {
 
     @SuppressWarnings("unchecked")
     public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        if (Game.SAVEGAME_LOADING_VERSION >= Game.SAVEGAME_V12) {
+        int loadVer = Game.SAVEGAME_LOADING_VERSION > 0 ? Game.SAVEGAME_LOADING_VERSION : Game.SAVEGAME_VERSION;
+        if (loadVer >= Game.SAVEGAME_V12) {
             version = in.readInt();
             heightMin = in.readInt();
             height = in.readInt();
@@ -234,5 +235,101 @@ public class BuryData implements Externalizable {
         }
 
         out.writeObject(hashTexts);
+    }
+
+    /**
+     * Generates a procedural sample ruin for starters or fallbacks.
+     */
+    public static BuryData createSampleRuin(String type) {
+        BuryData bd = new BuryData();
+        bd.setHeightMin(0);
+        bd.setHeight(1);
+        HashMap<Point3DShort, Integer> map = new HashMap<Point3DShort, Integer>();
+        HashMap<Point3DShort, ArrayList<String>> texts = new HashMap<Point3DShort, ArrayList<String>>();
+
+        int wallHeader = UtilsIniHeaders.getIntIniHeader("rounddarkblock");
+        int grayWallHeader = UtilsIniHeaders.getIntIniHeader("roundgrayblock");
+        int chestHeader = UtilsIniHeaders.getIntIniHeader("decorativechest");
+        int utilsChestHeader = UtilsIniHeaders.getIntIniHeader("utilschest");
+        int iteChestHeader = UtilsIniHeaders.getIntIniHeader("itechest");
+        int rmBarrelHeader = UtilsIniHeaders.getIntIniHeader("rmbarrel");
+        int rawFoodBarrelHeader = UtilsIniHeaders.getIntIniHeader("rawfoodbarrel");
+        int prepFoodBarrelHeader = UtilsIniHeaders.getIntIniHeader("prepfoodbarrel");
+        int armorCabinetHeader = UtilsIniHeaders.getIntIniHeader("armorcabinet");
+        int weaponCabinetHeader = UtilsIniHeaders.getIntIniHeader("weaponcabinet");
+
+        if ("ruined_catacombs".equalsIgnoreCase(type)) {
+            int w = 12, h = 8;
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    if (x == 0 || x == w - 1 || y == 0 || y == h - 1) {
+                        if (!(y == h / 2 && (x == 0 || x == w - 1))) { // doorways
+                            map.put(Point3DShort.getPoolInstance(x, y, 0), grayWallHeader);
+                        }
+                    }
+                }
+            }
+            map.put(Point3DShort.getPoolInstance(2, 2, 0), iteChestHeader);
+            map.put(Point3DShort.getPoolInstance(9, 2, 0), iteChestHeader);
+            map.put(Point3DShort.getPoolInstance(5, 4, 0), chestHeader);
+            map.put(Point3DShort.getPoolInstance(6, 4, 0), utilsChestHeader);
+        } else if ("forgotten_workshop".equalsIgnoreCase(type)) {
+            int w = 8, h = 8;
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    if (x == 0 || x == w - 1 || y == 0 || y == h - 1) {
+                        if (!(x == w / 2 && y == 0)) { // doorway
+                            map.put(Point3DShort.getPoolInstance(x, y, 0), wallHeader);
+                        }
+                    }
+                }
+            }
+            map.put(Point3DShort.getPoolInstance(2, 2, 0), utilsChestHeader);
+            map.put(Point3DShort.getPoolInstance(2, 5, 0), rmBarrelHeader);
+            map.put(Point3DShort.getPoolInstance(5, 2, 0), rawFoodBarrelHeader);
+            map.put(Point3DShort.getPoolInstance(5, 5, 0), prepFoodBarrelHeader);
+        } else {
+            // ancient_dungeon (default)
+            int w = 9, h = 9;
+            for (int x = 0; x < w; x++) {
+                for (int y = 0; y < h; y++) {
+                    if (x == 0 || x == w - 1 || y == 0 || y == h - 1) {
+                        if (!(x == w / 2 && y == 0)) { // doorway
+                            map.put(Point3DShort.getPoolInstance(x, y, 0), wallHeader);
+                        }
+                    }
+                }
+            }
+            map.put(Point3DShort.getPoolInstance(4, 4, 0), chestHeader);
+            map.put(Point3DShort.getPoolInstance(2, 2, 0), wallHeader);
+            map.put(Point3DShort.getPoolInstance(2, 6, 0), wallHeader);
+            map.put(Point3DShort.getPoolInstance(6, 2, 0), wallHeader);
+            map.put(Point3DShort.getPoolInstance(6, 6, 0), wallHeader);
+            map.put(Point3DShort.getPoolInstance(3, 7, 0), armorCabinetHeader);
+            map.put(Point3DShort.getPoolInstance(5, 7, 0), weaponCabinetHeader);
+        }
+
+        bd.setHash(map);
+        bd.setHashTexts(texts);
+        return bd;
+    }
+
+    /**
+     * Saves this BuryData instance as a zip archive containing bury.dat.
+     */
+    public static void saveToZip(BuryData bd, java.io.File zipFile) throws IOException {
+        java.io.File parent = zipFile.getParentFile();
+        if (parent != null && !parent.exists()) {
+            parent.mkdirs();
+        }
+        try (java.util.zip.ZipOutputStream zos = new java.util.zip.ZipOutputStream(new java.io.BufferedOutputStream(new java.io.FileOutputStream(zipFile)))) {
+            zos.putNextEntry(new java.util.zip.ZipEntry("bury.dat"));
+            java.io.ByteArrayOutputStream baos = new java.io.ByteArrayOutputStream();
+            java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(baos);
+            bd.writeExternal(oos);
+            oos.flush();
+            zos.write(baos.toByteArray());
+            zos.closeEntry();
+        }
     }
 }
